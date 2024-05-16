@@ -14,6 +14,10 @@ public:
 	POINT boardPos = { 60, 190 };
 	
 	Player player;
+	vector<Bullet> bullets;
+
+	vector<Enemy> enemys;
+
 public:
 	virtual ~EasyScene() override;
 	virtual void Init() override;
@@ -24,6 +28,12 @@ public:
 public:
 	void DrawBoard(HDC hDC);
 	void DrawPlayer(HDC hDC);
+	void DrawBullets(HDC hDC);
+	void DrawEnemys(HDC hDC);
+	void CreateEnemy();
+	void FireBullet(DIREC dir);
+	void CheckBoardBullet();
 	bool CheckBoardPlayer();
+	void CheckBoardEnemy();
 };
 

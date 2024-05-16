@@ -109,6 +109,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 			else
 				break;
+			break;
 		case 2:
 			if (Framework.SceneIndex == LOBBY) {
 				Framework.curFrameTime = clock();

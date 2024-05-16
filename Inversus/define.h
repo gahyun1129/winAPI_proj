@@ -3,10 +3,13 @@
 #define MAIN_TIMER			1
 #define MENU_TIMER			2
 
-#define MAIN_TIMER_FRAME	20 // 60FPS
+#define MAIN_TIMER_FRAME	60 // 60FPS
 #define MENU_TIMER_FRAME	150
 
+#define PI 3.1415926535897
+
 enum COLOR { WHITE, BLACK };
+enum DIREC { UP, DOWN, LEFT, RIGHT };
 enum VK_KEY {
 	VK_0 = 48,
 	VK_1 = 49,

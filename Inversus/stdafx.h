@@ -25,6 +25,7 @@
 #include <cmath>
 #include <windef.h>
 #include <assert.h>
+#include <vector>
 
 using namespace std;
 using namespace std::chrono;
@@ -40,7 +41,9 @@ using namespace std::chrono;
 #include "Camera.h"
 #include "Scene.h"
 #include "BoardRect.h"
+#include "Bullet.h"
 #include "Player.h"
+#include "Enemy.h"
 #include "EasyScene.h"
 #include "LobbyScene.h"
 #include "GameFramework.h"

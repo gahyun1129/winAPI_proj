@@ -53,7 +53,13 @@ void GameFramework::KeyBoard(UINT iMessage, WPARAM wParam, LPARAM lParam)
 			return;
 		}
 		else if (wParam == VK_P) {
-			CurScene->status = PAUSE;
+			if (CurScene->status == RUN) {
+				CurScene->status = PAUSE;
+			}
+			else if (CurScene->status == PAUSE) {
+				CurScene->status = RUN;
+			}
+
 		}
 	}
 	}

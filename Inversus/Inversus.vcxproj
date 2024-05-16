@@ -128,8 +128,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BoardRect.cpp" />
+    <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="EasyScene.cpp" />
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="LobbyScene.cpp" />
     <ClCompile Include="main.cpp" />
@@ -138,9 +140,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoardRect.h" />
+    <ClInclude Include="Bullet.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="define.h" />
     <ClInclude Include="EasyScene.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="LobbyScene.h" />
     <ClInclude Include="Player.h" />
