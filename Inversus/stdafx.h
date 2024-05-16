@@ -39,8 +39,12 @@ using namespace std::chrono;
 #include "define.h"
 #include "Camera.h"
 #include "Scene.h"
+#include "BoardRect.h"
+#include "Player.h"
+#include "EasyScene.h"
 #include "LobbyScene.h"
 #include "GameFramework.h"
+
 
 
 // 여기서 프로그램에 필요한 추가 헤더를 참조합니다.

@@ -12,6 +12,8 @@ public:
 	SCENELIST SceneIndex;
 	Scene* CurScene;
 
+	bool isRunning = true;
+
 public:
 
 	GameFramework();

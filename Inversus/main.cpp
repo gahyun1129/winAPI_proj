@@ -28,7 +28,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	WndClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 	RegisterClassEx(&WndClass);
 
-	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_OVERLAPPEDWINDOW, 0, 0, 1200, 800, NULL, (HMENU)NULL, hInstance, NULL);
+	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_OVERLAPPEDWINDOW, 0, 0, 1100, 900, NULL, (HMENU)NULL, hInstance, NULL);
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
@@ -47,7 +47,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
-	HDC mainDC, memDC;
+	HDC mainDC, memDC, easyDC;
 	HBITMAP hBitmap;
 	RECT rt;
 
@@ -77,6 +77,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			DeleteDC(memDC);
 			DeleteObject(hBitmap);
 		}
+		else if (Framework.SceneIndex == EASY) {
+			easyDC = CreateCompatibleDC(mainDC);
+			hBitmap = CreateCompatibleBitmap(mainDC, rt.right, rt.bottom);
+
+			SelectObject(easyDC, (HBITMAP)hBitmap);
+
+			SetBkColor(easyDC, RGB(0, 0, 0));
+			Rectangle(easyDC, 0, 0, rt.right, rt.bottom);
+
+			Framework.OnDraw(easyDC);
+
+			BitBlt(mainDC, 0, 0, rt.right, rt.bottom, easyDC, 0, 0, SRCCOPY);
+			DeleteDC(easyDC);
+			DeleteObject(hBitmap);
+		}
 
 		EndPaint(hWnd, &ps);
 		break;
@@ -90,7 +105,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				Framework.curFrameTime = clock();
 				Framework.OnUpdate(Framework.GetTick());
 				Framework.prevFrameTime = Framework.curFrameTime;
-				InvalidateRgn(hWnd, NULL, false);
+				InvalidateRect(hWnd, NULL, FALSE);
 			}
 			else
 				break;
@@ -99,20 +114,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				Framework.curFrameTime = clock();
 				Framework.OnUpdate(Framework.GetTick());
 				Framework.prevFrameTime = Framework.curFrameTime;
-				InvalidateRgn(hWnd, NULL, false);
+				InvalidateRect(hWnd, NULL, FALSE);
 			}
 			else
 				break;
 			break;
 		}
-		break;
-	}
-	case WM_CHAR:
-	{
-		if (wParam == 'q') {
-			PostQuitMessage(0);
-		}
-		InvalidateRect(hWnd, NULL, FALSE);
 		break;
 	}
 	case WM_KEYDOWN:

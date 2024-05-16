@@ -48,9 +48,12 @@ void GameFramework::KeyBoard(UINT iMessage, WPARAM wParam, LPARAM lParam)
 			SendMessage(m_hWnd, WM_DESTROY, 0, 0);	// 종료
 			return;
 		}
-		else if (wParam == 'q') {
+		else if (wParam == VK_Q) {
 			SendMessage(m_hWnd, WM_DESTROY, 0, 0);	// 종료
 			return;
+		}
+		else if (wParam == VK_P) {
+			CurScene->status = PAUSE;
 		}
 	}
 	}
