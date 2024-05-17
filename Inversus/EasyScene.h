@@ -18,6 +18,10 @@ public:
 
 	vector<Enemy> enemys;
 
+	int score = 0;
+
+	float enemyCoolTime = 5.f;
+
 public:
 	virtual ~EasyScene() override;
 	virtual void Init() override;
@@ -30,11 +34,16 @@ public:
 	void DrawPlayer(HDC hDC);
 	void DrawBullets(HDC hDC);
 	void DrawEnemys(HDC hDC);
+	void DrawTexts(HDC hDC);
+	void DrawComboBox(HDC hDC);
+	void DrawEnemyCoolTimeBox(HDC hDC);
 	void CreateEnemy();
 	void FireBullet(DIREC dir);
 	void CheckBoardBullet();
 	bool CheckBoardPlayer();
 	void CheckBoardEnemy();
 	void CheckBulletEnemy();
+	void CheckPlayerEnemy();
+	void EnemySpawn(float time);
 };
 

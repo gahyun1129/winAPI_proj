@@ -19,3 +19,21 @@ void Player::DrawBullet(HDC hDC, POINT boardPos)
 		}
 	}
 }
+
+void Player::ReviveCoolTime(float time)
+{
+	coolTime -= time;
+	if (coolTime < 0) {
+		isDead = false;
+		coolTime = 3.f;
+	}
+}
+
+void Player::ComboCoolTime(float time)
+{
+	comboCoolTime -= time;
+	if (comboCoolTime < 0) {
+		comboStack = 0;
+		comboCoolTime = 3.f;
+	}
+}

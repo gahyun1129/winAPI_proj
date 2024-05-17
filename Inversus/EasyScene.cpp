@@ -212,6 +212,79 @@ void EasyScene::DrawEnemys(HDC hDC)
 	}
 }
 
+void EasyScene::DrawTexts(HDC hDC)
+{
+	HFONT hFont, oldFont;
+	hFont = CreateFont(
+		36,                   // 높이
+		0,                    // 너비
+		0,                    // 기울기 각도
+		0,                    // 기본 방향 각도
+		FW_BOLD,              // 굵기
+		FALSE,                // 기울임
+		FALSE,                // 밑줄
+		FALSE,                // 취소선
+		DEFAULT_CHARSET,      // 문자 집합
+		OUT_DEFAULT_PRECIS,   // 출력 정밀도
+		CLIP_DEFAULT_PRECIS,  // 클리핑 정밀도
+		DEFAULT_QUALITY,      // 출력 품질
+		DEFAULT_PITCH | FF_SWISS,  // 글꼴과 피치
+		TEXT("Arial"));       // 글꼴 이름
+
+	oldFont = (HFONT)SelectObject(hDC, hFont);
+
+	TCHAR scoreTxt[100];
+	wsprintf(scoreTxt, L"SCORE: %d", score);
+	SetBkColor(hDC, RGB(255, 255, 255));
+	TextOut(hDC, 70, 90, scoreTxt, lstrlen(scoreTxt));
+
+	TCHAR modeTxt[100];
+	wsprintf(modeTxt, L"EASY MODE");
+	SetBkColor(hDC, RGB(120, 180, 210));
+	TextOut(hDC, 70, 40, modeTxt, lstrlen(modeTxt));
+
+	TCHAR HealthTxt[100];
+	wsprintf(HealthTxt, L"HEALTH: %d", player.health);
+	SetBkColor(hDC, RGB(255, 255, 255));
+	TextOut(hDC, 850, 40, HealthTxt, lstrlen(HealthTxt));
+
+	TCHAR enemyTxt[100];
+	wsprintf(enemyTxt, L">> NEXT ENEMY <<");
+	SetBkColor(hDC, RGB(255, 255, 255));
+	TextOut(hDC, 430, 40, enemyTxt, lstrlen(enemyTxt));
+
+	SelectObject(hDC, oldFont);
+
+	DeleteObject(hFont);
+}
+
+void EasyScene::DrawComboBox(HDC hDC)
+{
+	TCHAR comboTxt[100];
+	wsprintf(comboTxt, L"%d COMBO!!", player.comboStack);
+	SetBkColor(hDC, RGB(240, 180, 90));
+	TextOut(hDC, 770, 105, comboTxt, lstrlen(comboTxt));
+	Rectangle(hDC, 850, 100, 850 + 180, 130);
+
+	HBRUSH hBrush, oldBrush;
+	hBrush = CreateSolidBrush(RGB(240, 180, 90));
+	oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+	Rectangle(hDC, 850, 100, 850 + (player.comboCoolTime * 60), 130);
+	SelectObject(hDC, oldBrush);
+	DeleteObject(hBrush);
+}
+
+void EasyScene::DrawEnemyCoolTimeBox(HDC hDC)
+{
+	Rectangle(hDC, 450, 80, 450 + 250, 110);
+	HBRUSH hBrush, oldBrush;
+	hBrush = CreateSolidBrush(RGB(240, 120, 150));
+	oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+	Rectangle(hDC, 450, 80, 450 + (enemyCoolTime * 50), 110);
+	SelectObject(hDC, oldBrush);
+	DeleteObject(hBrush);
+}
+
 void EasyScene::CreateEnemy()
 {
 	Enemy e;
@@ -348,9 +421,45 @@ void EasyScene::CheckBulletEnemy()
 			if (IntersectRect(&tmp, &bulletR, &enemyR)) {
 				bullets.erase(bullets.begin() + i);
 				enemys.erase(enemys.begin() + j);
+				score += 100;
+				player.comboStack += 1;
+				player.comboCoolTime = 3.f;
 				break;
 			}
 		}
+	}
+}
+
+void EasyScene::CheckPlayerEnemy()
+{
+	RECT playerR = { player.pos.x + boardPos.x + player.size.left,
+				player.pos.y + boardPos.y + player.size.top,
+				player.pos.x + boardPos.x + player.size.right,
+				player.pos.y + boardPos.y + player.size.bottom };
+	for (int j = 0; j < enemys.size(); ++j) {
+		RECT enemyR = { enemys[j].pos.x + boardPos.x + enemys[j].size.left,
+				enemys[j].pos.y + boardPos.y + enemys[j].size.top,
+				enemys[j].pos.x + boardPos.x + enemys[j].size.right,
+				enemys[j].pos.y + boardPos.y + enemys[j].size.bottom };
+		RECT tmp;
+		if (IntersectRect(&tmp, &playerR, &enemyR)) {
+			player.isDead = true;
+			enemys.erase(enemys.begin() + j);
+			player.health -= 1;
+			if (player.health == 0) {
+				// 게임 오버
+			}
+			break;
+		}
+	}
+}
+
+void EasyScene::EnemySpawn(float time)
+{
+	enemyCoolTime -= time;
+	if (enemyCoolTime < 0) {
+		enemyCoolTime = 5.f;
+		CreateEnemy();
 	}
 }
 
@@ -360,6 +469,8 @@ void EasyScene::Update(const float frameTime)
 		return;
 	}
 
+	EnemySpawn(frameTime);
+
 	player.radian -= 5.f;
 
 	CheckBoardBullet();
@@ -368,6 +479,22 @@ void EasyScene::Update(const float frameTime)
 
 	CheckBulletEnemy();
 
+
+	if (player.isDead) {
+		player.ReviveCoolTime(frameTime);
+		if (!player.isDead) {
+			player.pos = { 6 * rectSize, 4 * rectSize };
+			board[6][4].color = WHITE;
+			player.bulletNum = 6;
+		}
+	}
+	else {
+		CheckPlayerEnemy();
+		score += 1;
+		if (player.comboStack > 0) {
+			player.ComboCoolTime(frameTime);
+		}
+	}
 }
 
 void EasyScene::Draw(HDC hDC)
@@ -386,8 +513,15 @@ void EasyScene::Draw(HDC hDC)
 	DrawEnemys(hDC);
 	
 	DrawBullets(hDC);
-	DrawPlayer(hDC);
-	player.DrawBullet(hDC, boardPos);
 
+	if (!player.isDead) {
+		DrawPlayer(hDC);
+		player.DrawBullet(hDC, boardPos);
+	}
+	DrawTexts(hDC);
+	if (player.comboStack > 0) {
+		DrawComboBox(hDC);
+	}
+	DrawEnemyCoolTimeBox(hDC);
 }
 
