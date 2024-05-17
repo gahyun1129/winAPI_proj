@@ -469,9 +469,8 @@ void EasyScene::Update(const float frameTime)
 		return;
 	}
 
-	EnemySpawn(frameTime);
 
-	player.radian -= 5.f;
+	player.radian -= frameTime;
 
 	CheckBoardBullet();
 
@@ -486,9 +485,11 @@ void EasyScene::Update(const float frameTime)
 			player.pos = { 6 * rectSize, 4 * rectSize };
 			board[6][4].color = WHITE;
 			player.bulletNum = 6;
+			enemyCoolTime = 5.f;
 		}
 	}
 	else {
+		EnemySpawn(frameTime);
 		CheckPlayerEnemy();
 		score += 1;
 		if (player.comboStack > 0) {

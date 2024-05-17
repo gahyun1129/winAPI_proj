@@ -10,12 +10,12 @@ Player::Player()
 void Player::DrawBullet(HDC hDC, POINT boardPos)
 {
 	POINT center = { boardPos.x + pos.x + rectSize / 2 , boardPos.y + pos.y + rectSize / 2 };
-
+	HBRUSH hBrush, oldBrush;
 	for (int i = 0; i < 6; ++i) {
-		POINT bulletPos = { center.x + cos(bullets[i].pos.x + radian) * 15, center.y + sin(bullets[i].pos.y + radian) * 15 };
+		POINT bulletPos = { center.x + cos(bullets[i].pos.x + radian) * 20, center.y + sin(bullets[i].pos.y + radian) * 20 };
 		if ( i < bulletNum)
 		{
-			Ellipse(hDC, bulletPos.x + 0, bulletPos.y + 0, bulletPos.x + 10, bulletPos.y + 10);
+			Ellipse(hDC, bulletPos.x - 5, bulletPos.y - 5, bulletPos.x + 15, bulletPos.y + 15);
 		}
 	}
 }
