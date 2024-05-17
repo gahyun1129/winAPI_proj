@@ -131,6 +131,7 @@
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="EasyScene.cpp" />
+    <ClCompile Include="Effect.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="LobbyScene.cpp" />
@@ -144,6 +145,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="define.h" />
     <ClInclude Include="EasyScene.h" />
+    <ClInclude Include="Effect.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="LobbyScene.h" />

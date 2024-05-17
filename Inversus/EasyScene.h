@@ -18,6 +18,8 @@ public:
 
 	vector<Enemy> enemys;
 
+	vector<Effect> effects;
+
 	int score = 0;
 
 	float enemyCoolTime = 5.f;
@@ -37,6 +39,7 @@ public:
 	void DrawTexts(HDC hDC);
 	void DrawComboBox(HDC hDC);
 	void DrawEnemyCoolTimeBox(HDC hDC);
+	void DrawEffect(HDC hDC);
 	void CreateEnemy();
 	void FireBullet(DIREC dir);
 	void CheckBoardBullet();

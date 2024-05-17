@@ -40,6 +40,7 @@ using namespace std::chrono;
 #include "define.h"
 #include "Camera.h"
 #include "Scene.h"
+#include "Effect.h"
 #include "BoardRect.h"
 #include "Bullet.h"
 #include "Player.h"

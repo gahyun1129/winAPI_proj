@@ -285,6 +285,21 @@ void EasyScene::DrawEnemyCoolTimeBox(HDC hDC)
 	DeleteObject(hBrush);
 }
 
+void EasyScene::DrawEffect(HDC hDC)
+{
+	HBRUSH hBrush, oldBrush;
+	for (int i = 0; i < effects.size(); ++i) {
+		hBrush = CreateSolidBrush(RGB(effects[i].r, effects[i].g, effects[i].b));
+		oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+		Ellipse(hDC, effects[i].size.left + effects[i].pos.x,
+			effects[i].size.top + effects[i].pos.y,
+			effects[i].size.right + effects[i].pos.x,
+			effects[i].size.bottom + effects[i].pos.y );
+		SelectObject(hDC, oldBrush);
+		DeleteObject(hBrush);
+	}
+}
+
 void EasyScene::CreateEnemy()
 {
 	Enemy e;
@@ -419,11 +434,24 @@ void EasyScene::CheckBulletEnemy()
 				enemys[j].pos.y + boardPos.y + enemys[j].size.bottom };
 			RECT tmp;
 			if (IntersectRect(&tmp, &bulletR, &enemyR)) {
-				bullets.erase(bullets.begin() + i);
-				enemys.erase(enemys.begin() + j);
 				score += 100;
 				player.comboStack += 1;
 				player.comboCoolTime = 3.f;
+
+				// effect
+				int num = rand() % 3 + 3;
+				for (int n = 0; n < num; ++n) {
+					Effect e;
+					e.size = { -10, -10, 10, 10 };
+					e.pos = { enemys[j].pos.x + boardPos.x + (rand() % 3 + 1)*20, enemys[j].pos.y + boardPos.y + (rand() % 3 + 1) * 20 };
+					e.coolTime = (rand() % 2) + 1;
+					e.r = 80;
+					e.g = 100;
+					e.b = 255;
+					effects.push_back(e);
+				}
+				bullets.erase(bullets.begin() + i);
+				enemys.erase(enemys.begin() + j);
 				break;
 			}
 		}
@@ -443,6 +471,29 @@ void EasyScene::CheckPlayerEnemy()
 				enemys[j].pos.y + boardPos.y + enemys[j].size.bottom };
 		RECT tmp;
 		if (IntersectRect(&tmp, &playerR, &enemyR)) {
+			// effect
+			int num = rand() % 3 + 3;
+			for (int n = 0; n < num; ++n) {
+				Effect e;
+				e.size = { -10, -10, 10, 10 };
+				e.pos = { enemys[j].pos.x + boardPos.x + (rand() % 3 + 1) * 20, enemys[j].pos.y + boardPos.y + (rand() % 3 + 1) * 20 };
+				e.coolTime = (rand() % 2) + 1;
+				e.r = 80;
+				e.g = 100;
+				e.b = 255;
+				effects.push_back(e);
+			}
+			num = rand() % 3 + 3;
+			for (int n = 0; n < num; ++n) {
+				Effect e;
+				e.size = { -10, -10, 10, 10 };
+				e.pos = { player.pos.x + boardPos.x + (rand() % 3 + 1) * 20, player.pos.y + boardPos.y + (rand() % 3 + 1) * 20 };
+				e.coolTime = (rand() % 2) + 1;
+				e.r = 255;
+				e.g = 0;
+				e.b = 0;
+				effects.push_back(e);
+			}
 			player.isDead = true;
 			enemys.erase(enemys.begin() + j);
 			player.health -= 1;
@@ -496,6 +547,13 @@ void EasyScene::Update(const float frameTime)
 			player.ComboCoolTime(frameTime);
 		}
 	}
+
+	for (int i = 0; i < effects.size(); ++i) {
+		if (effects[i].EffectCoolTime(frameTime)) {
+			effects.erase(effects.begin() + i);
+			break;
+		}
+	}
 }
 
 void EasyScene::Draw(HDC hDC)
@@ -524,5 +582,7 @@ void EasyScene::Draw(HDC hDC)
 		DrawComboBox(hDC);
 	}
 	DrawEnemyCoolTimeBox(hDC);
+
+	DrawEffect(hDC);
 }
 
