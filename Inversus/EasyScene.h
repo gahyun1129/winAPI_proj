@@ -35,5 +35,6 @@ public:
 	void CheckBoardBullet();
 	bool CheckBoardPlayer();
 	void CheckBoardEnemy();
+	void CheckBulletEnemy();
 };
 

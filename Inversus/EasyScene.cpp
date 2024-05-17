@@ -335,6 +335,25 @@ void EasyScene::CheckBoardEnemy()
 	}
 }
 
+void EasyScene::CheckBulletEnemy()
+{
+	for (int i = 0; i < bullets.size(); ++i) {
+		RECT bulletR = { bullets[i].pos.x, bullets[i].pos.y, bullets[i].pos.x + bullets[i].size.right, bullets[i].pos.y + bullets[i].size.bottom };
+		for (int j = 0; j < enemys.size(); ++j) {
+			RECT enemyR = { enemys[j].pos.x + boardPos.x + enemys[j].size.left,
+				enemys[j].pos.y + boardPos.y + enemys[j].size.top,
+				enemys[j].pos.x + boardPos.x + enemys[j].size.right,
+				enemys[j].pos.y + boardPos.y + enemys[j].size.bottom };
+			RECT tmp;
+			if (IntersectRect(&tmp, &bulletR, &enemyR)) {
+				bullets.erase(bullets.begin() + i);
+				enemys.erase(enemys.begin() + j);
+				break;
+			}
+		}
+	}
+}
+
 void EasyScene::Update(const float frameTime)
 {
 	if (status == PAUSE) {
@@ -346,6 +365,8 @@ void EasyScene::Update(const float frameTime)
 	CheckBoardBullet();
 
 	CheckBoardEnemy();
+
+	CheckBulletEnemy();
 
 }
 
