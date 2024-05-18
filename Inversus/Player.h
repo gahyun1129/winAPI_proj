@@ -23,10 +23,16 @@ public:
 
 	bool isHero = false;
 
+	float heroCoolTime = 1.f;
+
+	float resetBulletCoolTime = 1.f;
+
 public:
 	Player();
 	void DrawBullet(HDC hDC, POINT boardPos);
 	void ReviveCoolTime(float time);
 	void ComboCoolTime(float time);
+	void HEROCoolTime(float time);
+	void BulletCoolTime(float time);
 };
 

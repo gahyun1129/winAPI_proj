@@ -1,18 +1,16 @@
 #pragma once
-
-class EasyScene : public Scene
+class HardScene : public Scene
 {
-
 public:
-	BoardRect board[12][8];
+	BoardRect board[20][14];
 
-	int boardSizeX = 12;
-	int boardSizeY = 8;
-	
-	int rectSize = 80;
+	int boardSizeX = 20;
+	int boardSizeY = 14;
 
-	POINT boardPos = { 60, 190 };
-	
+	int rectSize = 45;
+
+	POINT boardPos = { 90, 190 };
+
 	Player player;
 	vector<Bullet> bullets;
 
@@ -25,11 +23,12 @@ public:
 	int score = 0;
 
 	float enemyCoolTime = 5.f;
+	int spawnNum = 4;
 
 	bool isHeroMode = false;
 
 public:
-	virtual ~EasyScene() override;
+	virtual ~HardScene() override;
 	virtual void Init() override;
 	virtual void Update(const float frameTime) override;
 	virtual void Draw(HDC hDC) override;

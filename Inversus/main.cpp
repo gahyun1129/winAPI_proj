@@ -47,7 +47,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
-	HDC mainDC, memDC, easyDC, endDC;
+	HDC mainDC, memDC, easyDC, normalDC, hardDC, endDC;
 	HBITMAP hBitmap;
 	RECT rt;
 
@@ -92,7 +92,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			DeleteDC(easyDC);
 			DeleteObject(hBitmap);
 		}
+		else if (Framework.SceneIndex == NORMAL) {
+			normalDC = CreateCompatibleDC(mainDC);
+			hBitmap = CreateCompatibleBitmap(mainDC, rt.right, rt.bottom);
 
+			SelectObject(normalDC, (HBITMAP)hBitmap);
+
+			SetBkColor(normalDC, RGB(0, 0, 0));
+			Rectangle(normalDC, -100, 0, rt.right + 200, rt.bottom);
+
+			Framework.OnDraw(normalDC);
+
+			BitBlt(mainDC, 0, 0, rt.right, rt.bottom, normalDC, Framework.mainCamera->pos.x, Framework.mainCamera->pos.y, SRCCOPY);
+			DeleteDC(normalDC);
+			DeleteObject(hBitmap);
+		}
+		else if (Framework.SceneIndex == HARD) {
+			hardDC = CreateCompatibleDC(mainDC);
+			hBitmap = CreateCompatibleBitmap(mainDC, rt.right, rt.bottom);
+
+			SelectObject(hardDC, (HBITMAP)hBitmap);
+
+			SetBkColor(hardDC, RGB(0, 0, 0));
+			Rectangle(hardDC, -100, 0, rt.right + 200, rt.bottom);
+
+			Framework.OnDraw(hardDC);
+
+			BitBlt(mainDC, 0, 0, rt.right, rt.bottom, hardDC, Framework.mainCamera->pos.x, Framework.mainCamera->pos.y, SRCCOPY);
+			DeleteDC(hardDC);
+			DeleteObject(hBitmap);
+		}
 		else if (Framework.SceneIndex == END) {
 			endDC = CreateCompatibleDC(mainDC);
 			hBitmap = CreateCompatibleBitmap(mainDC, rt.right, rt.bottom);
@@ -117,7 +146,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case 1:
-			if (Framework.SceneIndex == EASY) {
+			if (Framework.SceneIndex == EASY || Framework.SceneIndex == NORMAL || Framework.SceneIndex == HARD) {
 				Framework.curFrameTime = clock();
 				Framework.OnUpdate(Framework.GetTick());
 				Framework.prevFrameTime = Framework.curFrameTime;

@@ -2,11 +2,11 @@
 
 extern GameFramework Framework;
 
-EasyScene::~EasyScene()
+HardScene::~HardScene()
 {
 }
 
-void EasyScene::Init()
+void HardScene::Init()
 {
 	for (int i = 0; i < boardSizeX; ++i) {
 		for (int j = 0; j < boardSizeY; ++j) {
@@ -17,23 +17,27 @@ void EasyScene::Init()
 		}
 	}
 
-	for (int i = 4; i < 9; ++i) {
-		for (int j = 2; j < 7; ++j) {
+	for (int i = 8; i < 13; ++i) {
+		for (int j = 5; j < 10; ++j) {
 			board[i][j].color = WHITE;
 		}
 	}
-	board[4][2].color = BLACK;
-	board[8][2].color = BLACK;
-	board[4][6].color = BLACK;
-	board[8][6].color = BLACK;
+	board[8][5].color = BLACK;
+	board[8][9].color = BLACK;
+	board[12][5].color = BLACK;
+	board[12][9].color = BLACK;
 
-	player.size = { 5, 5, rectSize-5, rectSize-5 };
-	player.pos = { 6 * rectSize, 4 * rectSize };
+	player.size = { 5, 5, rectSize - 5, rectSize - 5 };
+	player.pos = { 10 * rectSize, 7 * rectSize };
 	player.rectSize = player.size.right - player.size.left;
+
+	for (int i = 0; i < 6; ++i) {
+		player.bullets[i].degree = 10;
+	}
 	CreateEnemy();
 }
 
-void EasyScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
+void HardScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	switch (iMessage)
 	{
@@ -96,7 +100,7 @@ void EasyScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
 	}
 }
 
-void EasyScene::DrawBoard(HDC hDC)
+void HardScene::DrawBoard(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 	HPEN hPen, oldPen;
@@ -116,7 +120,7 @@ void EasyScene::DrawBoard(HDC hDC)
 			oldPen = (HPEN)SelectObject(hDC, hPen);
 
 			Rectangle(hDC, boardPos.x + board[i][j].size.left, boardPos.y + board[i][j].size.top, boardPos.x + board[i][j].size.right, boardPos.y + board[i][j].size.bottom);
-			
+
 			SelectObject(hDC, oldBrush);
 			DeleteObject(hBrush);
 			DeleteObject(oldBrush);
@@ -128,7 +132,7 @@ void EasyScene::DrawBoard(HDC hDC)
 	}
 }
 
-void EasyScene::DrawPlayer(HDC hDC)
+void HardScene::DrawPlayer(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 
@@ -145,11 +149,11 @@ void EasyScene::DrawPlayer(HDC hDC)
 	DeleteObject(oldBrush);
 }
 
-void EasyScene::DrawBullets(HDC hDC)
+void HardScene::DrawBullets(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 	for (int i = 0; i < bullets.size(); ++i) {
-		for ( int j = 0; j < 4; ++j)
+		for (int j = 0; j < 4; ++j)
 		{
 			hBrush = CreateSolidBrush(RGB(50 + j * 40, 50 + j * 40, 50 + j * 40));
 			oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
@@ -175,7 +179,7 @@ void EasyScene::DrawBullets(HDC hDC)
 	}
 }
 
-void EasyScene::DrawEnemys(HDC hDC)
+void HardScene::DrawEnemys(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 
@@ -216,7 +220,7 @@ void EasyScene::DrawEnemys(HDC hDC)
 	}
 }
 
-void EasyScene::DrawTexts(HDC hDC)
+void HardScene::DrawTexts(HDC hDC)
 {
 	HFONT hFont, oldFont;
 	hFont = CreateFont(
@@ -243,7 +247,7 @@ void EasyScene::DrawTexts(HDC hDC)
 	TextOut(hDC, 70, 90, scoreTxt, lstrlen(scoreTxt));
 
 	TCHAR modeTxt[100];
-	wsprintf(modeTxt, L"EASY MODE");
+	wsprintf(modeTxt, L"HARD MODE");
 	SetBkColor(hDC, RGB(120, 180, 210));
 	TextOut(hDC, 70, 40, modeTxt, lstrlen(modeTxt));
 
@@ -262,7 +266,7 @@ void EasyScene::DrawTexts(HDC hDC)
 	DeleteObject(hFont);
 }
 
-void EasyScene::DrawComboBox(HDC hDC)
+void HardScene::DrawComboBox(HDC hDC)
 {
 	TCHAR comboTxt[100];
 	wsprintf(comboTxt, L"%d COMBO!!", player.comboStack);
@@ -278,7 +282,7 @@ void EasyScene::DrawComboBox(HDC hDC)
 	DeleteObject(hBrush);
 }
 
-void EasyScene::DrawEnemyCoolTimeBox(HDC hDC)
+void HardScene::DrawEnemyCoolTimeBox(HDC hDC)
 {
 	Rectangle(hDC, 450, 80, 450 + 250, 110);
 	HBRUSH hBrush, oldBrush;
@@ -289,7 +293,7 @@ void EasyScene::DrawEnemyCoolTimeBox(HDC hDC)
 	DeleteObject(hBrush);
 }
 
-void EasyScene::DrawEffect(HDC hDC)
+void HardScene::DrawEffect(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 	for (int i = 0; i < effects.size(); ++i) {
@@ -298,26 +302,26 @@ void EasyScene::DrawEffect(HDC hDC)
 		Ellipse(hDC, effects[i].size.left + effects[i].pos.x,
 			effects[i].size.top + effects[i].pos.y,
 			effects[i].size.right + effects[i].pos.x,
-			effects[i].size.bottom + effects[i].pos.y );
+			effects[i].size.bottom + effects[i].pos.y);
 		SelectObject(hDC, oldBrush);
 		DeleteObject(hBrush);
 	}
 }
 
-void EasyScene::DrawReadyBullets(HDC hDC)
+void HardScene::DrawReadyBullets(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 	for (int i = 0; i < readyBullets.size(); ++i) {
-		POINT bulletPos = { readyBullets[i].center.x + cos(readyBullets[i].pos.x + readyBullets[i].radian) * 20, readyBullets[i].center.y + sin(readyBullets[i].pos.y + readyBullets[i].radian) * 20 };
-			hBrush = CreateSolidBrush(RGB(readyBullets[i].r, readyBullets[i].g, readyBullets[i].b));
-			oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-			Ellipse(hDC, bulletPos.x - 5, bulletPos.y - 5, bulletPos.x + 15, bulletPos.y + 15);
-			SelectObject(hDC, oldBrush);
-			DeleteObject(hBrush);
+		POINT bulletPos = { readyBullets[i].center.x + cos(readyBullets[i].pos.x + readyBullets[i].radian) * readyBullets[i].degree, readyBullets[i].center.y + sin(readyBullets[i].pos.y + readyBullets[i].radian) * readyBullets[i].degree };
+		hBrush = CreateSolidBrush(RGB(readyBullets[i].r, readyBullets[i].g, readyBullets[i].b));
+		oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+		Ellipse(hDC, bulletPos.x, bulletPos.y, bulletPos.x + readyBullets[i].degree, bulletPos.y + readyBullets[i].degree);
+		SelectObject(hDC, oldBrush);
+		DeleteObject(hBrush);
 	}
 }
 
-void EasyScene::CreateEnemy()
+void HardScene::CreateEnemy()
 {
 	Enemy e;
 	e.size = { 5, 5, rectSize - 5, rectSize - 5 };
@@ -326,7 +330,7 @@ void EasyScene::CreateEnemy()
 	enemys.push_back(e);
 }
 
-void EasyScene::FireBullet(DIREC dir)
+void HardScene::FireBullet(DIREC dir)
 {
 	Bullet b;
 	if (player.bullets[player.bulletNum - 1].type == SPECIAL || player.comboStack == 1) {
@@ -336,17 +340,17 @@ void EasyScene::FireBullet(DIREC dir)
 		}
 		else {
 			b.size = { 0, 0, 20, 10 };
-			b.pos = { player.pos.x + boardPos.x + player.rectSize / 2, player.pos.y + boardPos.y + player.rectSize / 2 - 10};
+			b.pos = { player.pos.x + boardPos.x + player.rectSize / 2, player.pos.y + boardPos.y + player.rectSize / 2 - 10 };
 		}
 		b.dir = dir;
 		bullets.push_back(b);
 		if (dir == UP || dir == DOWN) {
 			b.size = { 0, 0, 10, 20 };
-			b.pos = { player.pos.x + boardPos.x + player.rectSize / 2 + 10 ,player.pos.y + boardPos.y + player.rectSize / 2};
+			b.pos = { player.pos.x + boardPos.x + player.rectSize / 2 + 10 ,player.pos.y + boardPos.y + player.rectSize / 2 };
 		}
 		else {
 			b.size = { 0, 0, 20, 10 };
-			b.pos = { player.pos.x + boardPos.x + player.rectSize / 2,player.pos.y + boardPos.y + player.rectSize / 2 + 10};
+			b.pos = { player.pos.x + boardPos.x + player.rectSize / 2,player.pos.y + boardPos.y + player.rectSize / 2 + 10 };
 		}
 		b.dir = dir;
 		bullets.push_back(b);
@@ -364,7 +368,7 @@ void EasyScene::FireBullet(DIREC dir)
 	}
 }
 
-void EasyScene::CheckBoardBullet()
+void HardScene::CheckBoardBullet()
 {
 	for (int i = 0; i < bullets.size(); ++i) {
 		switch (bullets[i].dir) {
@@ -377,7 +381,7 @@ void EasyScene::CheckBoardBullet()
 			break;
 		case DOWN:
 			bullets[i].pos.y += 20;
-			if (bullets[i].pos.y > (boardPos.y + 8 * rectSize)) {
+			if (bullets[i].pos.y > (boardPos.y + boardSizeY * rectSize)) {
 				bullets.erase(bullets.begin() + i);
 				return;
 			}
@@ -391,7 +395,7 @@ void EasyScene::CheckBoardBullet()
 			break;
 		case RIGHT:
 			bullets[i].pos.x += 20;
-			if (bullets[i].pos.x > (boardPos.x + 12 * rectSize)) {
+			if (bullets[i].pos.x > (boardPos.x + boardSizeX * rectSize)) {
 				bullets.erase(bullets.begin() + i);
 				return;
 			}
@@ -412,7 +416,7 @@ void EasyScene::CheckBoardBullet()
 	}
 }
 
-bool EasyScene::CheckBoardPlayer()
+bool HardScene::CheckBoardPlayer()
 {
 	if (board[player.pos.x / rectSize][player.pos.y / rectSize].color == BLACK) {
 		return true;
@@ -426,13 +430,13 @@ bool EasyScene::CheckBoardPlayer()
 	if (board[(player.pos.x) / rectSize][(player.pos.y + player.size.bottom) / rectSize].color == BLACK) {
 		return true;
 	}
-	if (player.pos.x < 0 || player.pos.x > 11 * rectSize || player.pos.y < 0 || player.pos.y > 7 * rectSize) {
+	if (player.pos.x < 0 || player.pos.x >(boardSizeX - 1) * rectSize || player.pos.y < 0 || player.pos.y >(boardSizeY - 1) * rectSize) {
 		return true;
 	}
 	return false;
 }
 
-void EasyScene::CheckBoardEnemy()
+void HardScene::CheckBoardEnemy()
 {
 	for (int i = 0; i < enemys.size(); ++i) {
 
@@ -464,10 +468,10 @@ void EasyScene::CheckBoardEnemy()
 	}
 }
 
-void EasyScene::CheckBulletEnemy()
+void HardScene::CheckBulletEnemy()
 {
 	for (int i = 0; i < bullets.size(); ++i) {
-		RECT bulletR = { bullets[i].pos.x, bullets[i].pos.y, bullets[i].pos.x + bullets[i].size.right, bullets[i].pos.y + bullets[i].size.bottom };
+		RECT bulletR = { bullets[i].pos.x - 50, bullets[i].pos.y - 50, bullets[i].pos.x + bullets[i].size.right + 50, bullets[i].pos.y + bullets[i].size.bottom + 50 };
 		for (int j = 0; j < enemys.size(); ++j) {
 			RECT enemyR = { enemys[j].pos.x + boardPos.x + enemys[j].size.left,
 				enemys[j].pos.y + boardPos.y + enemys[j].size.top,
@@ -483,8 +487,8 @@ void EasyScene::CheckBulletEnemy()
 				int num = rand() % 3 + 3;
 				for (int n = 0; n < num; ++n) {
 					Effect e;
-					e.size = { -10, -10, 10, 10 };
-					e.pos = { enemys[j].pos.x + boardPos.x + (rand() % 3 + 1)*20, enemys[j].pos.y + boardPos.y + (rand() % 3 + 1) * 20 };
+					e.size = { -5, -5, 5, 5 };
+					e.pos = { enemys[j].pos.x + boardPos.x + (rand() % 3 + 1) * 20, enemys[j].pos.y + boardPos.y + (rand() % 3 + 1) * 20 };
 					e.coolTime = (float)((rand() % 2) + 1);
 					e.r = 80;
 					e.g = 100;
@@ -497,9 +501,10 @@ void EasyScene::CheckBulletEnemy()
 					Bullet b;
 					b.r = 200, b.g = 200, b.b = 200;
 					b.center = { ((enemys[j].pos.x / rectSize) * rectSize) + boardPos.x + enemys[j].rectSize / 2, ((enemys[j].pos.y / rectSize) * rectSize) + boardPos.y + enemys[j].rectSize / 2 };
-					b.size = { 0, 0, 20, 20 };
-					b.pos = { (long)(((n + 1) * (360.0/num)) / 180.0 * PI), (long)(((n + 1) * (360.0 / num)) / 180.0 * PI) };
+					b.size = { 0, 0, 10, 10 };
+					b.pos = { (long)(((n + 1) * (360.0 / num)) / 180.0 * PI), (long)(((n + 1) * (360.0 / num)) / 180.0 * PI) };
 					b.num = num;
+					b.degree = 10;
 					readyBullets.push_back(b);
 				}
 				Framework.mainCamera->isShake = true;
@@ -511,7 +516,7 @@ void EasyScene::CheckBulletEnemy()
 	}
 }
 
-void EasyScene::CheckPlayerEnemy()
+void HardScene::CheckPlayerEnemy()
 {
 	RECT playerR = { player.pos.x + boardPos.x + player.size.left,
 				player.pos.y + boardPos.y + player.size.top,
@@ -528,7 +533,7 @@ void EasyScene::CheckPlayerEnemy()
 			int num = rand() % 3 + 3;
 			for (int n = 0; n < num; ++n) {
 				Effect e;
-				e.size = { -10, -10, 10, 10 };
+				e.size = { -5, -5, 5, 5 };
 				e.pos = { enemys[j].pos.x + boardPos.x + (rand() % 3 + 1) * 20, enemys[j].pos.y + boardPos.y + (rand() % 3 + 1) * 20 };
 				e.coolTime = (float)((rand() % 2) + 1);
 				e.r = 80;
@@ -539,7 +544,7 @@ void EasyScene::CheckPlayerEnemy()
 			num = rand() % 3 + 3;
 			for (int n = 0; n < num; ++n) {
 				Effect e;
-				e.size = { -10, -10, 10, 10 };
+				e.size = { -5, -5, 5, 5 };
 				e.pos = { player.pos.x + boardPos.x + (rand() % 3 + 1) * 20, player.pos.y + boardPos.y + (rand() % 3 + 1) * 20 };
 				e.coolTime = float((rand() % 2) + 1);
 				e.r = 255;
@@ -563,14 +568,14 @@ void EasyScene::CheckPlayerEnemy()
 	}
 }
 
-void EasyScene::CheckPlayerReadyBullets()
+void HardScene::CheckPlayerReadyBullets()
 {
 	RECT playerR = { player.pos.x + boardPos.x + player.size.left,
 				player.pos.y + boardPos.y + player.size.top,
 				player.pos.x + boardPos.x + player.size.right,
 				player.pos.y + boardPos.y + player.size.bottom };
 	for (int i = 0; i < readyBullets.size(); ++i) {
-		RECT bulletR = {readyBullets[i].center.x - rectSize/2, readyBullets[i].center.y - rectSize / 2, readyBullets[i].center.x + rectSize / 2, readyBullets[i].center.y + rectSize / 2 };
+		RECT bulletR = { readyBullets[i].center.x - rectSize / 2, readyBullets[i].center.y - rectSize / 2, readyBullets[i].center.x + rectSize / 2, readyBullets[i].center.y + rectSize / 2 };
 		RECT tmp;
 		if (IntersectRect(&tmp, &playerR, &bulletR)) {
 			readyBullets.erase(readyBullets.begin() + i);
@@ -584,11 +589,15 @@ void EasyScene::CheckPlayerReadyBullets()
 	}
 }
 
-void EasyScene::EnemySpawn(float time)
+void HardScene::EnemySpawn(float time)
 {
 	enemyCoolTime -= time;
 	if (enemyCoolTime < 0) {
-		enemyCoolTime = 5.f;
+		enemyCoolTime = 5.f - (5 - spawnNum);
+		spawnNum -= 1;
+		if (spawnNum < 1) {
+			spawnNum = 1;
+		}
 		int n = rand() % 3 + 1;
 		for (int i = 0; i < n; ++i) {
 			CreateEnemy();
@@ -596,7 +605,7 @@ void EasyScene::EnemySpawn(float time)
 	}
 }
 
-void EasyScene::Update(const float frameTime)
+void HardScene::Update(const float frameTime)
 {
 	if (status == PAUSE) {
 		return;
@@ -617,8 +626,8 @@ void EasyScene::Update(const float frameTime)
 	if (player.isDead) {
 		player.ReviveCoolTime(frameTime);
 		if (!player.isDead) {
-			player.pos = { 6 * rectSize, 4 * rectSize };
-			board[6][4].color = WHITE;
+			player.pos = { 10 * rectSize, 7 * rectSize };
+			board[10][7].color = WHITE;
 			player.bulletNum = 6;
 			enemyCoolTime = 5.f;
 			player.isHero = true;
@@ -636,6 +645,7 @@ void EasyScene::Update(const float frameTime)
 		if (player.comboStack > 0) {
 			player.ComboCoolTime(frameTime);
 		}
+
 		if (player.bulletNum == 0) {
 			player.BulletCoolTime(frameTime);
 		}
@@ -653,7 +663,7 @@ void EasyScene::Update(const float frameTime)
 	}
 }
 
-void EasyScene::Draw(HDC hDC)
+void HardScene::Draw(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 	hBrush = CreateSolidBrush(RGB(50, 50, 50));
@@ -665,9 +675,9 @@ void EasyScene::Draw(HDC hDC)
 
 
 	DrawBoard(hDC);
-	
+
 	DrawEnemys(hDC);
-	
+
 	DrawBullets(hDC);
 
 	if (!player.isDead) {
