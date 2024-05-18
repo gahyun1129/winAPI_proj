@@ -134,6 +134,7 @@
     <ClCompile Include="Effect.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameFramework.cpp" />
+    <ClCompile Include="GameOverScene.cpp" />
     <ClCompile Include="LobbyScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="Effect.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="GameFramework.h" />
+    <ClInclude Include="GameOverScene.h" />
     <ClInclude Include="LobbyScene.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Scene.h" />

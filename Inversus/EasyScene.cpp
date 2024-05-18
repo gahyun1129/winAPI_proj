@@ -551,7 +551,11 @@ void EasyScene::CheckPlayerEnemy()
 			enemys.erase(enemys.begin() + j);
 			player.health -= 1;
 			if (player.health == 0) {
-				// 게임 오버
+				Scene* scene = Framework.CurScene;   // 현재 씬을 tmp에 넣고 지워줌
+				Framework.CurScene = new GameOverScene;
+				Framework.CurScene->Init();
+				Framework.SceneIndex = END;
+				delete scene;
 			}
 			break;
 		}
@@ -619,7 +623,7 @@ void EasyScene::Update(const float frameTime)
 		}
 	}
 	else {
-		// EnemySpawn(frameTime);
+		EnemySpawn(frameTime);
 		if (!player.isHero) {
 			CheckPlayerEnemy();
 		}

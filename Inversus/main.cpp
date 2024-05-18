@@ -47,7 +47,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
-	HDC mainDC, memDC, easyDC;
+	HDC mainDC, memDC, easyDC, endDC;
 	HBITMAP hBitmap;
 	RECT rt;
 
@@ -93,6 +93,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			DeleteObject(hBitmap);
 		}
 
+		else if (Framework.SceneIndex == END) {
+			endDC = CreateCompatibleDC(mainDC);
+			hBitmap = CreateCompatibleBitmap(mainDC, rt.right, rt.bottom);
+
+			SelectObject(endDC, (HBITMAP)hBitmap);
+
+			SetBkColor(endDC, RGB(150, 150, 150));
+			Rectangle(endDC, 0, 300, rt.right + 200, rt.bottom- 300);
+
+			Framework.OnDraw(endDC);
+
+			BitBlt(mainDC, 0, 0, rt.right, rt.bottom, endDC, Framework.mainCamera->pos.x, Framework.mainCamera->pos.y, SRCCOPY);
+			DeleteDC(endDC);
+			DeleteObject(hBitmap);
+		}
+
 		EndPaint(hWnd, &ps);
 		break;
 	}
@@ -111,7 +127,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				break;
 			break;
 		case 2:
-			if (Framework.SceneIndex == LOBBY) {
+			if (Framework.SceneIndex == LOBBY || Framework.SceneIndex == END) {
 				Framework.curFrameTime = clock();
 				Framework.OnUpdate(Framework.GetTick());
 				Framework.prevFrameTime = Framework.curFrameTime;
