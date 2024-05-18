@@ -65,26 +65,26 @@ void EasyScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		else if (wParam == VK_UP) {
 			if (player.bulletNum > 0) {
-				player.bulletNum -= 1;
 				FireBullet(UP);
+				player.bulletNum -= 1;
 			}
 		}
 		else if (wParam == VK_DOWN) {
 			if (player.bulletNum > 0) {
-				player.bulletNum -= 1;
 				FireBullet(DOWN);
+				player.bulletNum -= 1;
 			}
 		}
 		else if (wParam == VK_LEFT) {
 			if (player.bulletNum > 0) {
-				player.bulletNum -= 1;
 				FireBullet(LEFT);
+				player.bulletNum -= 1;
 			}
 		}
 		else if (wParam == VK_RIGHT) {
 			if (player.bulletNum > 0) {
-				player.bulletNum -= 1;
 				FireBullet(RIGHT);
+				player.bulletNum -= 1;
 			}
 		}
 		else if (wParam == VK_K) {
@@ -328,15 +328,39 @@ void EasyScene::CreateEnemy()
 void EasyScene::FireBullet(DIREC dir)
 {
 	Bullet b;
-	b.pos = { player.pos.x + boardPos.x + player.rectSize / 2,player.pos.y + boardPos.y + player.rectSize / 2 };
-	b.dir = dir;
-	if (dir == UP || dir == DOWN) {
-		b.size = { 0, 0, 10, 20 };
+	if (player.bullets[player.bulletNum - 1].type == SPECIAL || player.comboStack == 1) {
+		if (dir == UP || dir == DOWN) {
+			b.size = { 0, 0, 10, 20 };
+			b.pos = { player.pos.x + boardPos.x + player.rectSize / 2 - 10, player.pos.y + boardPos.y + player.rectSize / 2 };
+		}
+		else {
+			b.size = { 0, 0, 20, 10 };
+			b.pos = { player.pos.x + boardPos.x + player.rectSize / 2, player.pos.y + boardPos.y + player.rectSize / 2 - 10};
+		}
+		b.dir = dir;
+		bullets.push_back(b);
+		if (dir == UP || dir == DOWN) {
+			b.size = { 0, 0, 10, 20 };
+			b.pos = { player.pos.x + boardPos.x + player.rectSize / 2 + 10 ,player.pos.y + boardPos.y + player.rectSize / 2};
+		}
+		else {
+			b.size = { 0, 0, 20, 10 };
+			b.pos = { player.pos.x + boardPos.x + player.rectSize / 2,player.pos.y + boardPos.y + player.rectSize / 2 + 10};
+		}
+		b.dir = dir;
+		bullets.push_back(b);
 	}
 	else {
-		b.size = { 0, 0, 20, 10 };
+		b.pos = { player.pos.x + boardPos.x + player.rectSize / 2,player.pos.y + boardPos.y + player.rectSize / 2 };
+		b.dir = dir;
+		if (dir == UP || dir == DOWN) {
+			b.size = { 0, 0, 10, 20 };
+		}
+		else {
+			b.size = { 0, 0, 20, 10 };
+		}
+		bullets.push_back(b);
 	}
-	bullets.push_back(b);
 }
 
 void EasyScene::CheckBoardBullet()
@@ -450,8 +474,8 @@ void EasyScene::CheckBulletEnemy()
 				enemys[j].pos.y + boardPos.y + enemys[j].size.bottom };
 			RECT tmp;
 			if (IntersectRect(&tmp, &bulletR, &enemyR)) {
-				score += 100;
 				player.comboStack += 1;
+				score += (100 * player.comboStack);
 				player.comboCoolTime = 3.f;
 
 				// effect
@@ -595,7 +619,7 @@ void EasyScene::Update(const float frameTime)
 		}
 	}
 	else {
-		EnemySpawn(frameTime);
+		// EnemySpawn(frameTime);
 		if (!player.isHero) {
 			CheckPlayerEnemy();
 		}
