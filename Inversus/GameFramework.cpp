@@ -61,8 +61,8 @@ void GameFramework::KeyBoard(UINT iMessage, WPARAM wParam, LPARAM lParam)
 			else if (CurScene->status == PAUSE) {
 				CurScene->status = RUN;
 			}
-
 		}
+		
 	}
 	}
 	CurScene->ProcessKey(iMessage, wParam, lParam);	//현재 씬의 프로세스키

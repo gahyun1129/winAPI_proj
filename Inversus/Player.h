@@ -21,6 +21,8 @@ public:
 
 	float comboCoolTime = 3.f;
 
+	bool isHero = false;
+
 public:
 	Player();
 	void DrawBullet(HDC hDC, POINT boardPos);

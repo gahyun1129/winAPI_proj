@@ -87,6 +87,9 @@ void EasyScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
 				FireBullet(RIGHT);
 			}
 		}
+		else if (wParam == VK_K) {
+			player.isHero = !player.isHero;
+		}
 	}
 	break;
 	}
@@ -593,7 +596,9 @@ void EasyScene::Update(const float frameTime)
 	}
 	else {
 		EnemySpawn(frameTime);
-		CheckPlayerEnemy();
+		if (!player.isHero) {
+			CheckPlayerEnemy();
+		}
 		score += 1;
 		if (player.comboStack > 0) {
 			player.ComboCoolTime(frameTime);
