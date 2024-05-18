@@ -14,7 +14,8 @@ void GameFramework::Reset()
 
 void GameFramework::Clear()
 {
-
+	delete(CurScene);
+	delete(mainCamera);
 }
 
 void GameFramework::Create(HWND hWnd)
@@ -23,7 +24,7 @@ void GameFramework::Create(HWND hWnd)
 
 	CurScene = new LobbyScene;
 	SceneIndex = LOBBY;
-	// mainCamera = new Camera;
+	mainCamera = new Camera;
 
 	CurScene->Init();
 }
@@ -36,6 +37,7 @@ void GameFramework::OnDraw(HDC hDC)
 void GameFramework::OnUpdate(const float frameTime)
 {
 	CurScene->Update(frameTime);
+	mainCamera->ShakeCam(frameTime);
 }
 
 void GameFramework::KeyBoard(UINT iMessage, WPARAM wParam, LPARAM lParam)

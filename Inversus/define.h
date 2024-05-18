@@ -10,6 +10,7 @@
 
 enum COLOR { WHITE, BLACK };
 enum DIREC { UP, DOWN, LEFT, RIGHT };
+enum TYPE { NONE, SPECIAL };
 enum VK_KEY {
 	VK_0 = 48,
 	VK_1 = 49,

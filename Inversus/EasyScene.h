@@ -20,6 +20,8 @@ public:
 
 	vector<Effect> effects;
 
+	vector<Bullet> readyBullets;
+
 	int score = 0;
 
 	float enemyCoolTime = 5.f;
@@ -40,6 +42,7 @@ public:
 	void DrawComboBox(HDC hDC);
 	void DrawEnemyCoolTimeBox(HDC hDC);
 	void DrawEffect(HDC hDC);
+	void DrawReadyBullets(HDC hDC);
 	void CreateEnemy();
 	void FireBullet(DIREC dir);
 	void CheckBoardBullet();
@@ -47,6 +50,7 @@ public:
 	void CheckBoardEnemy();
 	void CheckBulletEnemy();
 	void CheckPlayerEnemy();
+	void CheckPlayerReadyBullets();
 	void EnemySpawn(float time);
 };
 

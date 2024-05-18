@@ -269,7 +269,7 @@ void EasyScene::DrawComboBox(HDC hDC)
 	HBRUSH hBrush, oldBrush;
 	hBrush = CreateSolidBrush(RGB(240, 180, 90));
 	oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-	Rectangle(hDC, 850, 100, 850 + (player.comboCoolTime * 60), 130);
+	Rectangle(hDC, 850, 100, 850 + (int)(player.comboCoolTime * 60), 130);
 	SelectObject(hDC, oldBrush);
 	DeleteObject(hBrush);
 }
@@ -280,7 +280,7 @@ void EasyScene::DrawEnemyCoolTimeBox(HDC hDC)
 	HBRUSH hBrush, oldBrush;
 	hBrush = CreateSolidBrush(RGB(240, 120, 150));
 	oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-	Rectangle(hDC, 450, 80, 450 + (enemyCoolTime * 50), 110);
+	Rectangle(hDC, 450, 80, 450 + (int)(enemyCoolTime * 50), 110);
 	SelectObject(hDC, oldBrush);
 	DeleteObject(hBrush);
 }
@@ -297,6 +297,19 @@ void EasyScene::DrawEffect(HDC hDC)
 			effects[i].size.bottom + effects[i].pos.y );
 		SelectObject(hDC, oldBrush);
 		DeleteObject(hBrush);
+	}
+}
+
+void EasyScene::DrawReadyBullets(HDC hDC)
+{
+	HBRUSH hBrush, oldBrush;
+	for (int i = 0; i < readyBullets.size(); ++i) {
+		POINT bulletPos = { readyBullets[i].center.x + cos(readyBullets[i].pos.x + readyBullets[i].radian) * 20, readyBullets[i].center.y + sin(readyBullets[i].pos.y + readyBullets[i].radian) * 20 };
+			hBrush = CreateSolidBrush(RGB(readyBullets[i].r, readyBullets[i].g, readyBullets[i].b));
+			oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+			Ellipse(hDC, bulletPos.x - 5, bulletPos.y - 5, bulletPos.x + 15, bulletPos.y + 15);
+			SelectObject(hDC, oldBrush);
+			DeleteObject(hBrush);
 	}
 }
 
@@ -444,12 +457,24 @@ void EasyScene::CheckBulletEnemy()
 					Effect e;
 					e.size = { -10, -10, 10, 10 };
 					e.pos = { enemys[j].pos.x + boardPos.x + (rand() % 3 + 1)*20, enemys[j].pos.y + boardPos.y + (rand() % 3 + 1) * 20 };
-					e.coolTime = (rand() % 2) + 1;
+					e.coolTime = (float)((rand() % 2) + 1);
 					e.r = 80;
 					e.g = 100;
 					e.b = 255;
 					effects.push_back(e);
 				}
+
+				num = rand() % 3 + 2;
+				for (int n = 0; n < num; ++n) {
+					Bullet b;
+					b.r = 200, b.g = 200, b.b = 200;
+					b.center = { ((enemys[j].pos.x / rectSize) * rectSize) + boardPos.x + enemys[j].rectSize / 2, ((enemys[j].pos.y / rectSize) * rectSize) + boardPos.y + enemys[j].rectSize / 2 };
+					b.size = { 0, 0, 20, 20 };
+					b.pos = { (long)(((n + 1) * (360.0/num)) / 180.0 * PI), (long)(((n + 1) * (360.0 / num)) / 180.0 * PI) };
+					b.num = num;
+					readyBullets.push_back(b);
+				}
+				Framework.mainCamera->isShake = true;
 				bullets.erase(bullets.begin() + i);
 				enemys.erase(enemys.begin() + j);
 				break;
@@ -477,7 +502,7 @@ void EasyScene::CheckPlayerEnemy()
 				Effect e;
 				e.size = { -10, -10, 10, 10 };
 				e.pos = { enemys[j].pos.x + boardPos.x + (rand() % 3 + 1) * 20, enemys[j].pos.y + boardPos.y + (rand() % 3 + 1) * 20 };
-				e.coolTime = (rand() % 2) + 1;
+				e.coolTime = (float)((rand() % 2) + 1);
 				e.r = 80;
 				e.g = 100;
 				e.b = 255;
@@ -488,17 +513,39 @@ void EasyScene::CheckPlayerEnemy()
 				Effect e;
 				e.size = { -10, -10, 10, 10 };
 				e.pos = { player.pos.x + boardPos.x + (rand() % 3 + 1) * 20, player.pos.y + boardPos.y + (rand() % 3 + 1) * 20 };
-				e.coolTime = (rand() % 2) + 1;
+				e.coolTime = float((rand() % 2) + 1);
 				e.r = 255;
 				e.g = 0;
 				e.b = 0;
 				effects.push_back(e);
 			}
 			player.isDead = true;
+			// status = PAUSE;
 			enemys.erase(enemys.begin() + j);
 			player.health -= 1;
 			if (player.health == 0) {
 				// 게임 오버
+			}
+			break;
+		}
+	}
+}
+
+void EasyScene::CheckPlayerReadyBullets()
+{
+	RECT playerR = { player.pos.x + boardPos.x + player.size.left,
+				player.pos.y + boardPos.y + player.size.top,
+				player.pos.x + boardPos.x + player.size.right,
+				player.pos.y + boardPos.y + player.size.bottom };
+	for (int i = 0; i < readyBullets.size(); ++i) {
+		RECT bulletR = {readyBullets[i].center.x - rectSize/2, readyBullets[i].center.y - rectSize / 2, readyBullets[i].center.x + rectSize / 2, readyBullets[i].center.y + rectSize / 2 };
+		RECT tmp;
+		if (IntersectRect(&tmp, &playerR, &bulletR)) {
+			readyBullets.erase(readyBullets.begin() + i);
+			if (player.bulletNum < 6) {
+				player.bullets[player.bulletNum - 1].type = SPECIAL;
+				player.bullets[player.bulletNum - 1].r = 150, player.bullets[player.bulletNum - 1].g = 150, player.bullets[player.bulletNum - 1].b = 150;
+				player.bulletNum += 1;
 			}
 			break;
 		}
@@ -510,7 +557,10 @@ void EasyScene::EnemySpawn(float time)
 	enemyCoolTime -= time;
 	if (enemyCoolTime < 0) {
 		enemyCoolTime = 5.f;
-		CreateEnemy();
+		int n = rand() % 3 + 1;
+		for (int i = 0; i < n; ++i) {
+			CreateEnemy();
+		}
 	}
 }
 
@@ -528,6 +578,8 @@ void EasyScene::Update(const float frameTime)
 	CheckBoardEnemy();
 
 	CheckBulletEnemy();
+
+	CheckPlayerReadyBullets();
 
 
 	if (player.isDead) {
@@ -553,6 +605,10 @@ void EasyScene::Update(const float frameTime)
 			effects.erase(effects.begin() + i);
 			break;
 		}
+	}
+
+	for (int i = 0; i < readyBullets.size(); ++i) {
+		readyBullets[i].UpdateRadian(frameTime);
 	}
 }
 
@@ -584,5 +640,6 @@ void EasyScene::Draw(HDC hDC)
 	DrawEnemyCoolTimeBox(hDC);
 
 	DrawEffect(hDC);
+	DrawReadyBullets(hDC);
 }
 

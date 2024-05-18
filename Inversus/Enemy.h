@@ -8,5 +8,6 @@ public:
 
 	int coolTime = 0;
 	DIREC dir = (DIREC)(rand() % 4);
+
 };
 

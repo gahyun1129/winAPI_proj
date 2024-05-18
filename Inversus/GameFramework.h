@@ -12,6 +12,8 @@ public:
 	SCENELIST SceneIndex;
 	Scene* CurScene;
 
+	Camera* mainCamera;
+
 	bool isRunning = true;
 
 public:

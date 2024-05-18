@@ -15,7 +15,11 @@ void Player::DrawBullet(HDC hDC, POINT boardPos)
 		POINT bulletPos = { center.x + cos(bullets[i].pos.x + radian) * 20, center.y + sin(bullets[i].pos.y + radian) * 20 };
 		if ( i < bulletNum)
 		{
+			hBrush = CreateSolidBrush(RGB(bullets[i].r, bullets[i].g, bullets[i].b));
+			oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
 			Ellipse(hDC, bulletPos.x - 5, bulletPos.y - 5, bulletPos.x + 15, bulletPos.y + 15);
+			SelectObject(hDC, oldBrush);
+			DeleteObject(hBrush);
 		}
 	}
 }

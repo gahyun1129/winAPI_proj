@@ -84,11 +84,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SelectObject(easyDC, (HBITMAP)hBitmap);
 
 			SetBkColor(easyDC, RGB(0, 0, 0));
-			Rectangle(easyDC, 0, 0, rt.right, rt.bottom);
+			Rectangle(easyDC, -100, 0, rt.right + 200, rt.bottom);
 
 			Framework.OnDraw(easyDC);
 
-			BitBlt(mainDC, 0, 0, rt.right, rt.bottom, easyDC, 0, 0, SRCCOPY);
+			BitBlt(mainDC, 0, 0, rt.right, rt.bottom, easyDC, Framework.mainCamera->pos.x, Framework.mainCamera->pos.y, SRCCOPY);
 			DeleteDC(easyDC);
 			DeleteObject(hBitmap);
 		}
