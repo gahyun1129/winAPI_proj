@@ -34,7 +34,13 @@ void HardScene::Init()
 	for (int i = 0; i < 6; ++i) {
 		player.bullets[i].degree = 10;
 	}
-	CreateEnemy();
+	
+	int r = rand() % 6 + 5;
+	for (int i = 0; i < r; ++i) {
+		board[rand() % boardSizeX][rand() % boardSizeY].color = OBSTACLE;
+	}
+
+
 }
 
 void HardScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
@@ -68,25 +74,25 @@ void HardScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
 			}
 		}
 		else if (wParam == VK_UP) {
-			if (player.bulletNum > 0) {
+			if (player.bulletNum > 0 && !player.isDead) {
 				FireBullet(UP);
 				player.bulletNum -= 1;
 			}
 		}
 		else if (wParam == VK_DOWN) {
-			if (player.bulletNum > 0) {
+			if (player.bulletNum > 0 && !player.isDead) {
 				FireBullet(DOWN);
 				player.bulletNum -= 1;
 			}
 		}
 		else if (wParam == VK_LEFT) {
-			if (player.bulletNum > 0) {
+			if (player.bulletNum > 0 && !player.isDead) {
 				FireBullet(LEFT);
 				player.bulletNum -= 1;
 			}
 		}
 		else if (wParam == VK_RIGHT) {
-			if (player.bulletNum > 0) {
+			if (player.bulletNum > 0 && !player.isDead) {
 				FireBullet(RIGHT);
 				player.bulletNum -= 1;
 			}
@@ -94,6 +100,7 @@ void HardScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
 		else if (wParam == VK_K) {
 			player.isHero = !player.isHero;
 			isHeroMode = !isHeroMode;
+			player.heroCoolTime = 1.f;
 		}
 	}
 	break;
@@ -112,8 +119,12 @@ void HardScene::DrawBoard(HDC hDC)
 				hBrush = CreateSolidBrush(RGB(0, 0, 0));
 				hPen = CreatePen(PS_SOLID, 0, RGB(200, 200, 200));
 			}
-			else {
+			else if (board[i][j].color == WHITE) {
 				hBrush = CreateSolidBrush(RGB(255, 255, 255));
+				hPen = CreatePen(PS_SOLID, 0, RGB(0, 0, 0));
+			}
+			else {
+				hBrush = CreateSolidBrush(RGB(100, 100, 100));
 				hPen = CreatePen(PS_SOLID, 0, RGB(0, 0, 0));
 			}
 			oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
@@ -123,11 +134,9 @@ void HardScene::DrawBoard(HDC hDC)
 
 			SelectObject(hDC, oldBrush);
 			DeleteObject(hBrush);
-			DeleteObject(oldBrush);
 
 			SelectObject(hDC, oldPen);
 			DeleteObject(hPen);
-			DeleteObject(oldPen);
 		}
 	}
 }
@@ -146,7 +155,6 @@ void HardScene::DrawPlayer(HDC hDC)
 		20);
 	SelectObject(hDC, oldBrush);
 	DeleteObject(hBrush);
-	DeleteObject(oldBrush);
 }
 
 void HardScene::DrawBullets(HDC hDC)
@@ -174,7 +182,7 @@ void HardScene::DrawBullets(HDC hDC)
 			// Rectangle(hDC, bullets[i].pos.x, bullets[i].pos.y + j * 10, bullets[i].pos.x + 10, bullets[i].pos.y + 10 + j * 10);
 			SelectObject(hDC, oldBrush);
 			DeleteObject(hBrush);
-			DeleteObject(oldBrush);
+
 		}
 	}
 }
@@ -192,22 +200,38 @@ void HardScene::DrawEnemys(HDC hDC)
 	for (int i = 0; i < enemys.size(); ++i) {
 
 		POINT p = { enemys[i].pos.x / rectSize, enemys[i].pos.y / rectSize };
-		hBrush = CreateHatchBrush(HS_BDIAGONAL, RGB(80, 100, 255));
+		if (enemys[i].type == PASS) {
+			hBrush = CreateHatchBrush(HS_BDIAGONAL, RGB(80, 100, 255));
+		}
+		else {
+			hBrush = CreateHatchBrush(HS_BDIAGONAL, RGB(200, 200, 155));
+		}
 		oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
 
 		for (int j = 0; j < 9; ++j) {
 			if (p.x + neighbor[j].x >= 0 && p.y + neighbor[j].y >= 0 && p.x + neighbor[j].x < boardSizeX && p.y + neighbor[j].y < boardSizeY) {
 				if (board[p.x + neighbor[j].x][p.y + neighbor[j].y].color == BLACK) {
 					SetBkColor(hDC, RGB(0, 0, 0));
+					Rectangle(hDC, (p.x + neighbor[j].x) * rectSize + boardPos.x, (p.y + neighbor[j].y) * rectSize + boardPos.y, ((p.x + neighbor[j].x) + 1) * rectSize + boardPos.x, ((p.y + neighbor[j].y) + 1) * rectSize + boardPos.y);
 				}
-				else {
+				else if (board[p.x + neighbor[j].x][p.y + neighbor[j].y].color == WHITE) {
 					SetBkColor(hDC, RGB(255, 255, 255));
+					Rectangle(hDC, (p.x + neighbor[j].x) * rectSize + boardPos.x, (p.y + neighbor[j].y) * rectSize + boardPos.y, ((p.x + neighbor[j].x) + 1) * rectSize + boardPos.x, ((p.y + neighbor[j].y) + 1) * rectSize + boardPos.y);
 				}
-				Rectangle(hDC, (p.x + neighbor[j].x) * rectSize + boardPos.x, (p.y + neighbor[j].y) * rectSize + boardPos.y, ((p.x + neighbor[j].x) + 1) * rectSize + boardPos.x, ((p.y + neighbor[j].y) + 1) * rectSize + boardPos.y);
 			}
 		}
+		SelectObject(hDC, oldBrush);
+		DeleteObject(hBrush);
+	}
 
-		hBrush = CreateSolidBrush(RGB(80, 100, 255));
+	for (int i = 0; i < enemys.size(); ++i) {
+		if (enemys[i].type == PASS) {
+			hBrush = CreateSolidBrush(RGB(80, 100, 255));
+		}
+		else {
+			hBrush = CreateSolidBrush(RGB(200, 200, 155));
+		}
+		oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
 		SelectObject(hDC, hBrush);
 		Rectangle(hDC, enemys[i].pos.x + boardPos.x + enemys[i].size.left,
 			enemys[i].pos.y + boardPos.y + enemys[i].size.top,
@@ -215,8 +239,6 @@ void HardScene::DrawEnemys(HDC hDC)
 			enemys[i].pos.y + boardPos.y + enemys[i].size.bottom);
 		SelectObject(hDC, oldBrush);
 		DeleteObject(hBrush);
-		DeleteObject(oldBrush);
-
 	}
 }
 
@@ -401,6 +423,10 @@ void HardScene::CheckBoardBullet()
 			}
 			break;
 		}
+		if (board[(bullets[i].pos.x - boardPos.x) / rectSize][(bullets[i].pos.y - boardPos.y) / rectSize].color == OBSTACLE) {
+			bullets.erase(bullets.begin() + i);
+			break;
+		}
 		if (board[(bullets[i].pos.x - boardPos.x) / rectSize][(bullets[i].pos.y - boardPos.y) / rectSize].color == BLACK) {
 			board[(bullets[i].pos.x - boardPos.x) / rectSize][(bullets[i].pos.y - boardPos.y) / rectSize].color = WHITE;
 		}
@@ -418,7 +444,8 @@ void HardScene::CheckBoardBullet()
 
 bool HardScene::CheckBoardPlayer()
 {
-	if (board[player.pos.x / rectSize][player.pos.y / rectSize].color == BLACK) {
+	if (board[player.pos.x / rectSize][player.pos.y / rectSize].color == BLACK 
+		|| board[player.pos.x / rectSize][player.pos.y / rectSize].color == OBSTACLE) {
 		return true;
 	}
 	if (board[(player.pos.x + player.size.right) / rectSize][(player.pos.y + player.size.bottom) / rectSize].color == BLACK) {
@@ -440,17 +467,19 @@ void HardScene::CheckBoardEnemy()
 {
 	for (int i = 0; i < enemys.size(); ++i) {
 
-		if (player.pos.x < enemys[i].pos.x) {
-			enemys[i].pos.x -= 5;
-		}
-		else if (player.pos.x > enemys[i].pos.x) {
-			enemys[i].pos.x += 5;
-		}
-		if (player.pos.y > enemys[i].pos.y) {
-			enemys[i].pos.y += 5;
-		}
-		else if (player.pos.y < enemys[i].pos.y) {
-			enemys[i].pos.y -= 5;
+		if (enemys[i].type == PASS) {
+			if (player.pos.x < enemys[i].pos.x) {
+				enemys[i].pos.x -= 5;
+			}
+			else if (player.pos.x > enemys[i].pos.x) {
+				enemys[i].pos.x += 5;
+			}
+			if (player.pos.y > enemys[i].pos.y) {
+				enemys[i].pos.y += 5;
+			}
+			else if (player.pos.y < enemys[i].pos.y) {
+				enemys[i].pos.y -= 5;
+			}
 		}
 
 		if (board[(enemys[i].pos.x) / rectSize][(enemys[i].pos.y) / rectSize].color == WHITE) {
@@ -464,6 +493,63 @@ void HardScene::CheckBoardEnemy()
 		}
 		if (board[(enemys[i].pos.x) / rectSize][(enemys[i].pos.y + enemys[i].size.bottom) / rectSize].color == WHITE) {
 			board[(enemys[i].pos.x) / rectSize][(enemys[i].pos.y + enemys[i].size.bottom) / rectSize].color = BLACK;
+		}
+	}
+}
+
+void HardScene::CheckBoardNonPassEnemy(float time)
+{
+	for (int i = 0; i < enemys.size(); ++i) {
+		if (enemys[i].type == NONPASS) {
+			if (enemys[i].dir == UP) {
+				enemys[i].pos.y -= 5;
+				if (enemys[i].pos.y < 0) {
+					enemys[i].pos.y += 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+				else if (board[enemys[i].pos.x / rectSize][enemys[i].pos.y / rectSize].color == OBSTACLE) {
+					enemys[i].pos.y += 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+			}
+			else if (enemys[i].dir == DOWN) {
+				enemys[i].pos.y += 5;
+				if (enemys[i].pos.y + enemys[i].rectSize > boardSizeY * rectSize) {
+					enemys[i].pos.y -= 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+				else if (board[enemys[i].pos.x / rectSize][(enemys[i].pos.y + rectSize) / rectSize].color == OBSTACLE) {
+					enemys[i].pos.y += 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+			}
+			else if (enemys[i].dir == LEFT) {
+				enemys[i].pos.x -= 5;
+				if (enemys[i].pos.x < 0) {
+					enemys[i].pos.x += 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+				else if (board[enemys[i].pos.x / rectSize][enemys[i].pos.y / rectSize].color == OBSTACLE) {
+					enemys[i].pos.x += 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+			}
+			else if (enemys[i].dir == RIGHT) {
+				enemys[i].pos.x += 5;
+				if (enemys[i].pos.x + enemys[i].rectSize > boardSizeX * rectSize) {
+					enemys[i].pos.x -= 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+				else if (board[(enemys[i].pos.x + rectSize) / rectSize][(enemys[i].pos.y) / rectSize].color == OBSTACLE) {
+					enemys[i].pos.x += 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+			}
+			enemys[i].coolTime -= time;
+			if (enemys[i].coolTime < 0) {
+				enemys[i].coolTime = 2.f;
+				enemys[i].dir = (DIREC)(rand() % 4);
+			}
 		}
 	}
 }
@@ -557,6 +643,7 @@ void HardScene::CheckPlayerEnemy()
 			enemys.clear();
 			player.health -= 1;
 			if (player.health == 0) {
+				Framework.WriteScore(score);
 				Scene* scene = Framework.CurScene;   // ÇöÀç ¾ÀÀ» tmp¿¡ ³Ö°í Áö¿öÁÜ
 				Framework.CurScene = new GameOverScene;
 				Framework.CurScene->Init();
@@ -595,10 +682,10 @@ void HardScene::EnemySpawn(float time)
 	if (enemyCoolTime < 0) {
 		enemyCoolTime = 5.f - (5 - spawnNum);
 		spawnNum -= 1;
-		if (spawnNum < 1) {
-			spawnNum = 1;
+		if (spawnNum < 2) {
+			spawnNum = 2;
 		}
-		int n = rand() % 3 + 1;
+		int n = rand() % 2 + 1;
 		for (int i = 0; i < n; ++i) {
 			CreateEnemy();
 		}
@@ -617,6 +704,7 @@ void HardScene::Update(const float frameTime)
 	CheckBoardBullet();
 
 	CheckBoardEnemy();
+	CheckBoardNonPassEnemy(frameTime);
 
 	CheckBulletEnemy();
 
@@ -638,7 +726,7 @@ void HardScene::Update(const float frameTime)
 		if (!player.isHero) {
 			CheckPlayerEnemy();
 		}
-		if (player.isHero && !isHeroMode) {
+		if (player.isHero && isHeroMode == false) {
 			player.HEROCoolTime(frameTime);
 		}
 		score += 1;
@@ -671,7 +759,6 @@ void HardScene::Draw(HDC hDC)
 	Rectangle(hDC, 0, 150, 1100, 900);
 	SelectObject(hDC, oldBrush);
 	DeleteObject(hBrush);
-	DeleteObject(oldBrush);
 
 
 	DrawBoard(hDC);

@@ -47,7 +47,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
-	HDC mainDC, memDC, easyDC, normalDC, hardDC, endDC;
+	HDC mainDC, memDC, easyDC, normalDC, hardDC, heroDC, endDC;
 	HBITMAP hBitmap;
 	RECT rt;
 
@@ -68,7 +68,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			SelectObject(memDC, (HBITMAP)hBitmap);
 
-			SetBkColor(memDC, RGB(0, 0, 0));
+			SetBkColor(memDC, RGB(100, 100, 100));
 			Rectangle(memDC, 0, 0, rt.right, rt.bottom);
 
 			Framework.OnDraw(memDC);
@@ -122,6 +122,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			DeleteDC(hardDC);
 			DeleteObject(hBitmap);
 		}
+		else if (Framework.SceneIndex == HERO) {
+			heroDC = CreateCompatibleDC(mainDC);
+			hBitmap = CreateCompatibleBitmap(mainDC, rt.right, rt.bottom);
+
+			SelectObject(heroDC, (HBITMAP)hBitmap);
+
+			SetBkColor(heroDC, RGB(0, 0, 0));
+			Rectangle(heroDC, -100, 0, rt.right + 200, rt.bottom);
+
+			Framework.OnDraw(heroDC);
+
+			BitBlt(mainDC, 0, 0, rt.right, rt.bottom, heroDC, Framework.mainCamera->pos.x, Framework.mainCamera->pos.y, SRCCOPY);
+			DeleteDC(heroDC);
+			DeleteObject(hBitmap);
+		}
 		else if (Framework.SceneIndex == END) {
 			endDC = CreateCompatibleDC(mainDC);
 			hBitmap = CreateCompatibleBitmap(mainDC, rt.right, rt.bottom);
@@ -129,7 +144,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SelectObject(endDC, (HBITMAP)hBitmap);
 
 			SetBkColor(endDC, RGB(150, 150, 150));
-			Rectangle(endDC, 0, 300, rt.right + 200, rt.bottom- 300);
+			Rectangle(endDC, 0, 300, rt.right + 200, rt.bottom - 150);
 
 			Framework.OnDraw(endDC);
 
@@ -146,7 +161,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case 1:
-			if (Framework.SceneIndex == EASY || Framework.SceneIndex == NORMAL || Framework.SceneIndex == HARD) {
+			if (Framework.SceneIndex == EASY || Framework.SceneIndex == NORMAL || Framework.SceneIndex == HARD || Framework.SceneIndex == HERO) {
 				Framework.curFrameTime = clock();
 				Framework.OnUpdate(Framework.GetTick());
 				Framework.prevFrameTime = Framework.curFrameTime;
@@ -168,6 +183,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	}
+	case WM_LBUTTONDOWN:
 	case WM_KEYDOWN:
 	case WM_KEYUP:
 	{

@@ -6,8 +6,8 @@ public:
 	POINT pos;
 	int rectSize;
 
-	int coolTime = 0;
+	float coolTime = 2.f;
 	DIREC dir = (DIREC)(rand() % 4);
-
+	ENEMYTYPE type = (ENEMYTYPE)(rand() % 2);
 };
 

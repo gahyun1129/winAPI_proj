@@ -26,6 +26,9 @@
 #include <windef.h>
 #include <assert.h>
 #include <vector>
+#include <fstream>
+#include <algorithm>
+#include <functional>
 
 using namespace std;
 using namespace std::chrono;
@@ -43,12 +46,14 @@ using namespace std::chrono;
 #include "GameOverScene.h"
 #include "Effect.h"
 #include "BoardRect.h"
+#include "Obstacle.h"
 #include "Bullet.h"
 #include "Player.h"
 #include "Enemy.h"
 #include "EasyScene.h"
 #include "NormalScene.h"
 #include "HardScene.h"
+#include "HeroScene.h"
 #include "LobbyScene.h"
 #include "GameFramework.h"
 

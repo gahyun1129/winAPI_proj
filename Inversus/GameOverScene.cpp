@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+extern GameFramework Framework;
+
 GameOverScene::~GameOverScene()
 {
 }
@@ -37,6 +39,8 @@ void GameOverScene::Draw(HDC hDC)
 	wsprintf(scoreTxt, L"GameOver...");
 	SetBkColor(hDC, RGB(255, 255, 255));
 	TextOut(hDC, 380, 400, scoreTxt, lstrlen(scoreTxt));
+	SetBkColor(hDC, RGB(255, 255, 255));
+	TextOut(hDC, 200, 500, L"press r button to retry", lstrlen(L"press r button to retry"));
 
 	SelectObject(hDC, oldFont);
 
@@ -45,4 +49,18 @@ void GameOverScene::Draw(HDC hDC)
 
 void GameOverScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
+	switch (iMessage)
+	{
+	case WM_KEYDOWN:
+	{
+		if (wParam == VK_R) {
+			Scene* scene = Framework.CurScene;   // ÇöÀç ¾ÀÀ» tmp¿¡ ³Ö°í Áö¿öÁÜ
+			Framework.CurScene = new LobbyScene;
+			Framework.CurScene->Init();
+			Framework.SceneIndex = EASY;
+			delete scene;
+		}
+	}
+	break;
+	}
 }

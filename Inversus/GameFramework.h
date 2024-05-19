@@ -31,6 +31,7 @@ public:
 
 	float GetTick();
 
+	void WriteScore(int score);
 private:
 	HWND m_hWnd;
 };

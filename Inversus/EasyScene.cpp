@@ -64,25 +64,25 @@ void EasyScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
 			}
 		}
 		else if (wParam == VK_UP) {
-			if (player.bulletNum > 0) {
+			if (player.bulletNum > 0 && !player.isDead) {
 				FireBullet(UP);
 				player.bulletNum -= 1;
 			}
 		}
 		else if (wParam == VK_DOWN) {
-			if (player.bulletNum > 0) {
+			if (player.bulletNum > 0 && !player.isDead) {
 				FireBullet(DOWN);
 				player.bulletNum -= 1;
 			}
 		}
 		else if (wParam == VK_LEFT) {
-			if (player.bulletNum > 0) {
+			if (player.bulletNum > 0 && !player.isDead) {
 				FireBullet(LEFT);
 				player.bulletNum -= 1;
 			}
 		}
 		else if (wParam == VK_RIGHT) {
-			if (player.bulletNum > 0) {
+			if (player.bulletNum > 0 && !player.isDead) {
 				FireBullet(RIGHT);
 				player.bulletNum -= 1;
 			}
@@ -90,6 +90,7 @@ void EasyScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
 		else if (wParam == VK_K) {
 			player.isHero = !player.isHero;
 			isHeroMode = !isHeroMode;
+			player.heroCoolTime = 1.f;
 		}
 	}
 	break;
@@ -119,11 +120,11 @@ void EasyScene::DrawBoard(HDC hDC)
 			
 			SelectObject(hDC, oldBrush);
 			DeleteObject(hBrush);
-			DeleteObject(oldBrush);
+
 
 			SelectObject(hDC, oldPen);
 			DeleteObject(hPen);
-			DeleteObject(oldPen);
+
 		}
 	}
 }
@@ -203,16 +204,19 @@ void EasyScene::DrawEnemys(HDC hDC)
 			}
 		}
 
+		DeleteObject(hBrush);
+
+	}
+
+	for (int i = 0; i < enemys.size(); ++i) {
 		hBrush = CreateSolidBrush(RGB(80, 100, 255));
-		SelectObject(hDC, hBrush);
+		oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
 		Rectangle(hDC, enemys[i].pos.x + boardPos.x + enemys[i].size.left,
 			enemys[i].pos.y + boardPos.y + enemys[i].size.top,
 			enemys[i].pos.x + boardPos.x + enemys[i].size.right,
 			enemys[i].pos.y + boardPos.y + enemys[i].size.bottom);
 		SelectObject(hDC, oldBrush);
 		DeleteObject(hBrush);
-		DeleteObject(oldBrush);
-
 	}
 }
 
@@ -552,6 +556,7 @@ void EasyScene::CheckPlayerEnemy()
 			enemys.clear();
 			player.health -= 1;
 			if (player.health == 0) {
+				Framework.WriteScore(score);
 				Scene* scene = Framework.CurScene;   // ÇöÀç ¾ÀÀ» tmp¿¡ ³Ö°í Áö¿öÁÜ
 				Framework.CurScene = new GameOverScene;
 				Framework.CurScene->Init();

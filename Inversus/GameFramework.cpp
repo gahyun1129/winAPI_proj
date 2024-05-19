@@ -14,7 +14,6 @@ void GameFramework::Reset()
 
 void GameFramework::Clear()
 {
-	delete(CurScene);
 	delete(mainCamera);
 }
 
@@ -71,4 +70,14 @@ void GameFramework::KeyBoard(UINT iMessage, WPARAM wParam, LPARAM lParam)
 float GameFramework::GetTick()
 {
 	return (float)(curFrameTime - prevFrameTime) / 1000;
+}
+
+void GameFramework::WriteScore(int score)
+{
+	ofstream oFile("scores.txt", ios::app);
+	if (!oFile) {
+		return;
+	}
+	oFile << score << endl;
+	oFile.close();
 }

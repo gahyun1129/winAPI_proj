@@ -2,11 +2,11 @@
 
 extern GameFramework Framework;
 
-NormalScene::~NormalScene()
+HeroScene::~HeroScene()
 {
 }
 
-void NormalScene::Init()
+void HeroScene::Init()
 {
 	for (int i = 0; i < boardSizeX; ++i) {
 		for (int j = 0; j < boardSizeY; ++j) {
@@ -34,10 +34,16 @@ void NormalScene::Init()
 	for (int i = 0; i < 6; ++i) {
 		player.bullets[i].degree = 10;
 	}
-	CreateEnemy();
+
+	int r = rand() % 6 + 5;
+	for (int i = 0; i < r; ++i) {
+		board[rand() % boardSizeX][rand() % boardSizeY].color = OBSTACLE;
+	}
+
+
 }
 
-void NormalScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
+void HeroScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	switch (iMessage)
 	{
@@ -68,25 +74,25 @@ void NormalScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
 			}
 		}
 		else if (wParam == VK_UP) {
-			if (player.bulletNum > 0 && !player.isDead) {
+			if (player.bulletNum > 0) {
 				FireBullet(UP);
 				player.bulletNum -= 1;
 			}
 		}
 		else if (wParam == VK_DOWN) {
-			if (player.bulletNum > 0 && !player.isDead) {
+			if (player.bulletNum > 0) {
 				FireBullet(DOWN);
 				player.bulletNum -= 1;
 			}
 		}
 		else if (wParam == VK_LEFT) {
-			if (player.bulletNum > 0 && !player.isDead) {
+			if (player.bulletNum > 0) {
 				FireBullet(LEFT);
 				player.bulletNum -= 1;
 			}
 		}
 		else if (wParam == VK_RIGHT) {
-			if (player.bulletNum > 0 && !player.isDead) {
+			if (player.bulletNum > 0) {
 				FireBullet(RIGHT);
 				player.bulletNum -= 1;
 			}
@@ -94,14 +100,13 @@ void NormalScene::ProcessKey(UINT iMessage, WPARAM wParam, LPARAM lParam)
 		else if (wParam == VK_K) {
 			player.isHero = !player.isHero;
 			isHeroMode = !isHeroMode;
-			player.heroCoolTime = 1.f;
 		}
 	}
 	break;
 	}
 }
 
-void NormalScene::DrawBoard(HDC hDC)
+void HeroScene::DrawBoard(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 	HPEN hPen, oldPen;
@@ -113,8 +118,12 @@ void NormalScene::DrawBoard(HDC hDC)
 				hBrush = CreateSolidBrush(RGB(0, 0, 0));
 				hPen = CreatePen(PS_SOLID, 0, RGB(200, 200, 200));
 			}
-			else {
+			else if (board[i][j].color == WHITE) {
 				hBrush = CreateSolidBrush(RGB(255, 255, 255));
+				hPen = CreatePen(PS_SOLID, 0, RGB(0, 0, 0));
+			}
+			else {
+				hBrush = CreateSolidBrush(RGB(100, 100, 100));
 				hPen = CreatePen(PS_SOLID, 0, RGB(0, 0, 0));
 			}
 			oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
@@ -124,14 +133,16 @@ void NormalScene::DrawBoard(HDC hDC)
 
 			SelectObject(hDC, oldBrush);
 			DeleteObject(hBrush);
+			DeleteObject(oldBrush);
 
 			SelectObject(hDC, oldPen);
 			DeleteObject(hPen);
+			DeleteObject(oldPen);
 		}
 	}
 }
 
-void NormalScene::DrawPlayer(HDC hDC)
+void HeroScene::DrawPlayer(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 
@@ -145,10 +156,10 @@ void NormalScene::DrawPlayer(HDC hDC)
 		20);
 	SelectObject(hDC, oldBrush);
 	DeleteObject(hBrush);
-
+	DeleteObject(oldBrush);
 }
 
-void NormalScene::DrawBullets(HDC hDC)
+void HeroScene::DrawBullets(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 	for (int i = 0; i < bullets.size(); ++i) {
@@ -173,12 +184,12 @@ void NormalScene::DrawBullets(HDC hDC)
 			// Rectangle(hDC, bullets[i].pos.x, bullets[i].pos.y + j * 10, bullets[i].pos.x + 10, bullets[i].pos.y + 10 + j * 10);
 			SelectObject(hDC, oldBrush);
 			DeleteObject(hBrush);
-
+			DeleteObject(oldBrush);
 		}
 	}
 }
 
-void NormalScene::DrawEnemys(HDC hDC)
+void HeroScene::DrawEnemys(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 
@@ -191,28 +202,39 @@ void NormalScene::DrawEnemys(HDC hDC)
 	for (int i = 0; i < enemys.size(); ++i) {
 
 		POINT p = { enemys[i].pos.x / rectSize, enemys[i].pos.y / rectSize };
-		hBrush = CreateHatchBrush(HS_BDIAGONAL, RGB(80, 100, 255));
+		if (enemys[i].type == PASS) {
+			hBrush = CreateHatchBrush(HS_BDIAGONAL, RGB(80, 100, 255));
+		}
+		else {
+			hBrush = CreateHatchBrush(HS_BDIAGONAL, RGB(200, 200, 155));
+		}
 		oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
 
 		for (int j = 0; j < 9; ++j) {
 			if (p.x + neighbor[j].x >= 0 && p.y + neighbor[j].y >= 0 && p.x + neighbor[j].x < boardSizeX && p.y + neighbor[j].y < boardSizeY) {
 				if (board[p.x + neighbor[j].x][p.y + neighbor[j].y].color == BLACK) {
 					SetBkColor(hDC, RGB(0, 0, 0));
+					Rectangle(hDC, (p.x + neighbor[j].x) * rectSize + boardPos.x, (p.y + neighbor[j].y) * rectSize + boardPos.y, ((p.x + neighbor[j].x) + 1) * rectSize + boardPos.x, ((p.y + neighbor[j].y) + 1) * rectSize + boardPos.y);
 				}
-				else {
+				else if (board[p.x + neighbor[j].x][p.y + neighbor[j].y].color == WHITE) {
 					SetBkColor(hDC, RGB(255, 255, 255));
+					Rectangle(hDC, (p.x + neighbor[j].x) * rectSize + boardPos.x, (p.y + neighbor[j].y) * rectSize + boardPos.y, ((p.x + neighbor[j].x) + 1) * rectSize + boardPos.x, ((p.y + neighbor[j].y) + 1) * rectSize + boardPos.y);
 				}
-				Rectangle(hDC, (p.x + neighbor[j].x) * rectSize + boardPos.x, (p.y + neighbor[j].y) * rectSize + boardPos.y, ((p.x + neighbor[j].x) + 1) * rectSize + boardPos.x, ((p.y + neighbor[j].y) + 1) * rectSize + boardPos.y);
 			}
 		}
-		
+		SelectObject(hDC, oldBrush);
 		DeleteObject(hBrush);
-
 	}
 
 	for (int i = 0; i < enemys.size(); ++i) {
-		hBrush = CreateSolidBrush(RGB(80, 100, 255));
+		if (enemys[i].type == PASS) {
+			hBrush = CreateSolidBrush(RGB(80, 100, 255));
+		}
+		else {
+			hBrush = CreateSolidBrush(RGB(200, 200, 155));
+		}
 		oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+		SelectObject(hDC, hBrush);
 		Rectangle(hDC, enemys[i].pos.x + boardPos.x + enemys[i].size.left,
 			enemys[i].pos.y + boardPos.y + enemys[i].size.top,
 			enemys[i].pos.x + boardPos.x + enemys[i].size.right,
@@ -222,7 +244,7 @@ void NormalScene::DrawEnemys(HDC hDC)
 	}
 }
 
-void NormalScene::DrawTexts(HDC hDC)
+void HeroScene::DrawTexts(HDC hDC)
 {
 	HFONT hFont, oldFont;
 	hFont = CreateFont(
@@ -249,7 +271,7 @@ void NormalScene::DrawTexts(HDC hDC)
 	TextOut(hDC, 70, 90, scoreTxt, lstrlen(scoreTxt));
 
 	TCHAR modeTxt[100];
-	wsprintf(modeTxt, L"NORMAL MODE");
+	wsprintf(modeTxt, L"HERO MODE");
 	SetBkColor(hDC, RGB(120, 180, 210));
 	TextOut(hDC, 70, 40, modeTxt, lstrlen(modeTxt));
 
@@ -268,7 +290,7 @@ void NormalScene::DrawTexts(HDC hDC)
 	DeleteObject(hFont);
 }
 
-void NormalScene::DrawComboBox(HDC hDC)
+void HeroScene::DrawComboBox(HDC hDC)
 {
 	TCHAR comboTxt[100];
 	wsprintf(comboTxt, L"%d COMBO!!", player.comboStack);
@@ -284,7 +306,7 @@ void NormalScene::DrawComboBox(HDC hDC)
 	DeleteObject(hBrush);
 }
 
-void NormalScene::DrawEnemyCoolTimeBox(HDC hDC)
+void HeroScene::DrawEnemyCoolTimeBox(HDC hDC)
 {
 	Rectangle(hDC, 450, 80, 450 + 250, 110);
 	HBRUSH hBrush, oldBrush;
@@ -295,7 +317,7 @@ void NormalScene::DrawEnemyCoolTimeBox(HDC hDC)
 	DeleteObject(hBrush);
 }
 
-void NormalScene::DrawEffect(HDC hDC)
+void HeroScene::DrawEffect(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 	for (int i = 0; i < effects.size(); ++i) {
@@ -310,11 +332,11 @@ void NormalScene::DrawEffect(HDC hDC)
 	}
 }
 
-void NormalScene::DrawReadyBullets(HDC hDC)
+void HeroScene::DrawReadyBullets(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 	for (int i = 0; i < readyBullets.size(); ++i) {
-		POINT bulletPos = { readyBullets[i].center.x + cos(readyBullets[i].pos.x + readyBullets[i].radian) * readyBullets[i].degree, readyBullets[i].center.y + sin(readyBullets[i].pos.y + readyBullets[i].radian) *readyBullets[i].degree };
+		POINT bulletPos = { readyBullets[i].center.x + cos(readyBullets[i].pos.x + readyBullets[i].radian) * readyBullets[i].degree, readyBullets[i].center.y + sin(readyBullets[i].pos.y + readyBullets[i].radian) * readyBullets[i].degree };
 		hBrush = CreateSolidBrush(RGB(readyBullets[i].r, readyBullets[i].g, readyBullets[i].b));
 		oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
 		Ellipse(hDC, bulletPos.x, bulletPos.y, bulletPos.x + readyBullets[i].degree, bulletPos.y + readyBullets[i].degree);
@@ -323,7 +345,7 @@ void NormalScene::DrawReadyBullets(HDC hDC)
 	}
 }
 
-void NormalScene::CreateEnemy()
+void HeroScene::CreateEnemy()
 {
 	Enemy e;
 	e.size = { 5, 5, rectSize - 5, rectSize - 5 };
@@ -332,7 +354,7 @@ void NormalScene::CreateEnemy()
 	enemys.push_back(e);
 }
 
-void NormalScene::FireBullet(DIREC dir)
+void HeroScene::FireBullet(DIREC dir)
 {
 	Bullet b;
 	if (player.bullets[player.bulletNum - 1].type == SPECIAL || player.comboStack == 1) {
@@ -370,7 +392,7 @@ void NormalScene::FireBullet(DIREC dir)
 	}
 }
 
-void NormalScene::CheckBoardBullet()
+void HeroScene::CheckBoardBullet()
 {
 	for (int i = 0; i < bullets.size(); ++i) {
 		switch (bullets[i].dir) {
@@ -403,6 +425,10 @@ void NormalScene::CheckBoardBullet()
 			}
 			break;
 		}
+		if (board[(bullets[i].pos.x - boardPos.x) / rectSize][(bullets[i].pos.y - boardPos.y) / rectSize].color == OBSTACLE) {
+			bullets.erase(bullets.begin() + i);
+			break;
+		}
 		if (board[(bullets[i].pos.x - boardPos.x) / rectSize][(bullets[i].pos.y - boardPos.y) / rectSize].color == BLACK) {
 			board[(bullets[i].pos.x - boardPos.x) / rectSize][(bullets[i].pos.y - boardPos.y) / rectSize].color = WHITE;
 		}
@@ -418,9 +444,10 @@ void NormalScene::CheckBoardBullet()
 	}
 }
 
-bool NormalScene::CheckBoardPlayer()
+bool HeroScene::CheckBoardPlayer()
 {
-	if (board[player.pos.x / rectSize][player.pos.y / rectSize].color == BLACK) {
+	if (board[player.pos.x / rectSize][player.pos.y / rectSize].color == BLACK
+		|| board[player.pos.x / rectSize][player.pos.y / rectSize].color == OBSTACLE) {
 		return true;
 	}
 	if (board[(player.pos.x + player.size.right) / rectSize][(player.pos.y + player.size.bottom) / rectSize].color == BLACK) {
@@ -432,27 +459,29 @@ bool NormalScene::CheckBoardPlayer()
 	if (board[(player.pos.x) / rectSize][(player.pos.y + player.size.bottom) / rectSize].color == BLACK) {
 		return true;
 	}
-	if (player.pos.x < 0 || player.pos.x > (boardSizeX -1) * rectSize || player.pos.y < 0 || player.pos.y > (boardSizeY-1) * rectSize) {
+	if (player.pos.x < 0 || player.pos.x >(boardSizeX - 1) * rectSize || player.pos.y < 0 || player.pos.y >(boardSizeY - 1) * rectSize) {
 		return true;
 	}
 	return false;
 }
 
-void NormalScene::CheckBoardEnemy()
+void HeroScene::CheckBoardEnemy()
 {
 	for (int i = 0; i < enemys.size(); ++i) {
 
-		if (player.pos.x < enemys[i].pos.x) {
-			enemys[i].pos.x -= 5;
-		}
-		else if (player.pos.x > enemys[i].pos.x) {
-			enemys[i].pos.x += 5;
-		}
-		if (player.pos.y > enemys[i].pos.y) {
-			enemys[i].pos.y += 5;
-		}
-		else if (player.pos.y < enemys[i].pos.y) {
-			enemys[i].pos.y -= 5;
+		if (enemys[i].type == PASS) {
+			if (player.pos.x < enemys[i].pos.x) {
+				enemys[i].pos.x -= 5;
+			}
+			else if (player.pos.x > enemys[i].pos.x) {
+				enemys[i].pos.x += 5;
+			}
+			if (player.pos.y > enemys[i].pos.y) {
+				enemys[i].pos.y += 5;
+			}
+			else if (player.pos.y < enemys[i].pos.y) {
+				enemys[i].pos.y -= 5;
+			}
 		}
 
 		if (board[(enemys[i].pos.x) / rectSize][(enemys[i].pos.y) / rectSize].color == WHITE) {
@@ -470,10 +499,67 @@ void NormalScene::CheckBoardEnemy()
 	}
 }
 
-void NormalScene::CheckBulletEnemy()
+void HeroScene::CheckBoardNonPassEnemy(float time)
+{
+	for (int i = 0; i < enemys.size(); ++i) {
+		if (enemys[i].type == NONPASS) {
+			if (enemys[i].dir == UP) {
+				enemys[i].pos.y -= 5;
+				if (enemys[i].pos.y < 0) {
+					enemys[i].pos.y += 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+				else if (board[enemys[i].pos.x / rectSize][enemys[i].pos.y / rectSize].color == OBSTACLE) {
+					enemys[i].pos.y += 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+			}
+			else if (enemys[i].dir == DOWN) {
+				enemys[i].pos.y += 5;
+				if (enemys[i].pos.y + enemys[i].rectSize > boardSizeY * rectSize) {
+					enemys[i].pos.y -= 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+				else if (board[enemys[i].pos.x / rectSize][(enemys[i].pos.y + rectSize) / rectSize].color == OBSTACLE) {
+					enemys[i].pos.y += 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+			}
+			else if (enemys[i].dir == LEFT) {
+				enemys[i].pos.x -= 5;
+				if (enemys[i].pos.x < 0) {
+					enemys[i].pos.x += 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+				else if (board[enemys[i].pos.x / rectSize][enemys[i].pos.y / rectSize].color == OBSTACLE) {
+					enemys[i].pos.x += 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+			}
+			else if (enemys[i].dir == RIGHT) {
+				enemys[i].pos.x += 5;
+				if (enemys[i].pos.x + enemys[i].rectSize > boardSizeX * rectSize) {
+					enemys[i].pos.x -= 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+				else if (board[(enemys[i].pos.x + rectSize) / rectSize][(enemys[i].pos.y) / rectSize].color == OBSTACLE) {
+					enemys[i].pos.x += 5;
+					enemys[i].dir = (DIREC)(rand() % 4);
+				}
+			}
+			enemys[i].coolTime -= time;
+			if (enemys[i].coolTime < 0) {
+				enemys[i].coolTime = 2.f;
+				enemys[i].dir = (DIREC)(rand() % 4);
+			}
+		}
+	}
+}
+
+void HeroScene::CheckBulletEnemy()
 {
 	for (int i = 0; i < bullets.size(); ++i) {
-		RECT bulletR = { bullets[i].pos.x - 50, bullets[i].pos.y - 50, bullets[i].pos.x + bullets[i].size.right + 50, bullets[i].pos.y + bullets[i].size.bottom + 50};
+		RECT bulletR = { bullets[i].pos.x - 50, bullets[i].pos.y - 50, bullets[i].pos.x + bullets[i].size.right + 50, bullets[i].pos.y + bullets[i].size.bottom + 50 };
 		for (int j = 0; j < enemys.size(); ++j) {
 			RECT enemyR = { enemys[j].pos.x + boardPos.x + enemys[j].size.left,
 				enemys[j].pos.y + boardPos.y + enemys[j].size.top,
@@ -518,7 +604,7 @@ void NormalScene::CheckBulletEnemy()
 	}
 }
 
-void NormalScene::CheckPlayerEnemy()
+void HeroScene::CheckPlayerEnemy()
 {
 	RECT playerR = { player.pos.x + boardPos.x + player.size.left,
 				player.pos.y + boardPos.y + player.size.top,
@@ -559,7 +645,6 @@ void NormalScene::CheckPlayerEnemy()
 			enemys.clear();
 			player.health -= 1;
 			if (player.health == 0) {
-				Framework.WriteScore(score);
 				Scene* scene = Framework.CurScene;   // ÇöÀç ¾ÀÀ» tmp¿¡ ³Ö°í Áö¿öÁÜ
 				Framework.CurScene = new GameOverScene;
 				Framework.CurScene->Init();
@@ -571,7 +656,7 @@ void NormalScene::CheckPlayerEnemy()
 	}
 }
 
-void NormalScene::CheckPlayerReadyBullets()
+void HeroScene::CheckPlayerReadyBullets()
 {
 	RECT playerR = { player.pos.x + boardPos.x + player.size.left,
 				player.pos.y + boardPos.y + player.size.top,
@@ -592,23 +677,23 @@ void NormalScene::CheckPlayerReadyBullets()
 	}
 }
 
-void NormalScene::EnemySpawn(float time)
+void HeroScene::EnemySpawn(float time)
 {
 	enemyCoolTime -= time;
 	if (enemyCoolTime < 0) {
 		enemyCoolTime = 5.f - (5 - spawnNum);
 		spawnNum -= 1;
-		if (spawnNum < 1) {
-			spawnNum = 1;
+		if (spawnNum < 2) {
+			spawnNum = 2;
 		}
-		int n = rand() % 3 + 1;
+		int n = rand() % 2 + 1;
 		for (int i = 0; i < n; ++i) {
 			CreateEnemy();
 		}
 	}
 }
 
-void NormalScene::Update(const float frameTime)
+void HeroScene::Update(const float frameTime)
 {
 	if (status == PAUSE) {
 		return;
@@ -620,6 +705,7 @@ void NormalScene::Update(const float frameTime)
 	CheckBoardBullet();
 
 	CheckBoardEnemy();
+	CheckBoardNonPassEnemy(frameTime);
 
 	CheckBulletEnemy();
 
@@ -639,7 +725,7 @@ void NormalScene::Update(const float frameTime)
 	else {
 		EnemySpawn(frameTime);
 		if (!player.isHero) {
-			CheckPlayerEnemy();
+			//CheckPlayerEnemy();
 		}
 		if (player.isHero && !isHeroMode) {
 			player.HEROCoolTime(frameTime);
@@ -666,7 +752,7 @@ void NormalScene::Update(const float frameTime)
 	}
 }
 
-void NormalScene::Draw(HDC hDC)
+void HeroScene::Draw(HDC hDC)
 {
 	HBRUSH hBrush, oldBrush;
 	hBrush = CreateSolidBrush(RGB(50, 50, 50));
@@ -674,7 +760,7 @@ void NormalScene::Draw(HDC hDC)
 	Rectangle(hDC, 0, 150, 1100, 900);
 	SelectObject(hDC, oldBrush);
 	DeleteObject(hBrush);
-
+	DeleteObject(oldBrush);
 
 
 	DrawBoard(hDC);

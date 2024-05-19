@@ -1,7 +1,6 @@
 #pragma once
-class HardScene : public Scene
+class HeroScene : public Scene
 {
-public:
 	BoardRect board[20][14];
 
 	int boardSizeX = 20;
@@ -30,7 +29,7 @@ public:
 	vector<Obstacle> obstacles;
 
 public:
-	virtual ~HardScene() override;
+	virtual ~HeroScene() override;
 	virtual void Init() override;
 	virtual void Update(const float frameTime) override;
 	virtual void Draw(HDC hDC) override;

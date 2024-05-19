@@ -136,9 +136,11 @@
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="GameOverScene.cpp" />
     <ClCompile Include="HardScene.cpp" />
+    <ClCompile Include="HeroScene.cpp" />
     <ClCompile Include="LobbyScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NormalScene.cpp" />
+    <ClCompile Include="Obstacle.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />
   </ItemGroup>
@@ -153,8 +155,10 @@
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="GameOverScene.h" />
     <ClInclude Include="HardScene.h" />
+    <ClInclude Include="HeroScene.h" />
     <ClInclude Include="LobbyScene.h" />
     <ClInclude Include="NormalScene.h" />
+    <ClInclude Include="Obstacle.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="stdafx.h" />
